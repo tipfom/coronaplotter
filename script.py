@@ -11,6 +11,8 @@ from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 import scipy.optimize
 import math
+from datetime import datetime  
+from datetime import timedelta  
 
 font = {'family': 'normal',
         'weight': 'normal',
@@ -23,18 +25,17 @@ plt.rc('axes', labelsize=20)
 def exponential_fit_function(x, a, b):
     return a*np.exp(b*x)
 
-
 def sigmoidal_fit_function(x, a, b, c):
     return a/(1+np.exp(-b*(x-c)))
 
 
 total_data_y = [45, 62, 121, 198, 291, 440, 571,
-                830, 1287, 1975, 2744, 4515, 5974, 7711, 9692]
+                830, 1287, 1975, 2744, 4515, 5974, 7711, 9692, 11791]
 regression_start = 5
 sigmoidal_start = 13
 
 xmin = 0
-xmax = 17
+xmax = 18
 xstep = 3
 
 for l in range(regression_start, len(total_data_y)+4):
@@ -52,9 +53,10 @@ for l in range(regression_start, len(total_data_y)+4):
     fig.set_figwidth(10*12/9)
     majxticks = ([], [])
 
-    for j in range(xmin, xmax, xstep):
+    startdate  = datetime(2020,1,16)
+    for j in range(xmin, xmax+1, xstep):
         majxticks[0].append(j)
-        majxticks[1].append(str(16+j) + ". Jan")
+        majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
 
     ax.set_xlim([xmin, xmax])
     plt.xticks(majxticks[0], majxticks[1])
@@ -85,6 +87,10 @@ for l in range(regression_start, len(total_data_y)+4):
         std_y = unp.std_devs(fit_y_unc)
 
         if k == i:
+            print("[" + str(l) +"] Exponential fit-parameters:")
+            print("a = " + str(a))
+            print("b = " + str(b))
+
             plt.plot(nom_x, nom_y, color="blue", linewidth=2,
                      label="data fitted to an exponential function")
             ax.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor="blue",
@@ -112,10 +118,10 @@ for l in range(regression_start, len(total_data_y)+4):
         std_y = unp.std_devs(fit_y_unc)
 
         if k == i:
-            print(str(l))
-            print("a: " + str(a))
-            print("a: " + str(b))
-            print("a: " + str(c))
+            print("[" + str(l) +"] Sigmoid fit-parameters:")
+            print("a = " + str(a))
+            print("b = " + str(b))
+            print("c = " + str(c))
             plt.plot(nom_x, nom_y, color="orange", linewidth=2,
                      label="data fitted to an sigmoidal function")
             ax.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor="orange",
@@ -128,25 +134,28 @@ for l in range(regression_start, len(total_data_y)+4):
                             std_y, facecolor="orange", alpha=0.1)
 
     plt.xlabel("date")
-    plt.ylabel("total # of infected people in Mainland China")
+    plt.ylabel("total # of confirmed infections in Mainland China")
 
     ax.spines['bottom'].set_color('black')
     ax.spines['top'].set_color('white')
     ax.spines['right'].set_color('white')
     ax.spines['left'].set_color('black')
 
-    legendel_originaldata = Line2D([0], [0], marker='s', color='black', lw=0, label='Scatter', markerfacecolor='black', markersize=10)
-    legendel_exponentialfit = Line2D([0], [0], color='b', lw=4, label='Line')
-    legendel_sigmoidalfit = Line2D([0], [0], color='b', lw=4, label='Line')
-    legendel_exponential_areaofuncertainty = Patch(facecolor='blue', alpha=0.5, label="e")
-    legendel_sigmoidal_areaofuncertainty = Patch(facecolor='orange', alpha=0.5, label="d")
+    legendel_originaldata = Line2D([0], [0], marker='s', color='black',
+                                   lw=0, label='Scatter', markerfacecolor='black', markersize=10)
+    legendel_exponentialfit = Line2D([0], [0], color='blue', lw=4, label='Line')
+    legendel_sigmoidalfit = Line2D([0], [0], color='orange', lw=4, label='Line')
+    legendel_exponential_areaofuncertainty = Patch(
+        facecolor='blue', alpha=0.5, label="e")
+    legendel_sigmoidal_areaofuncertainty = Patch(
+        facecolor='orange', alpha=0.5, label="d")
 
     ax.legend([legendel_originaldata,
                legendel_exponentialfit,
                legendel_exponential_areaofuncertainty,
                legendel_sigmoidalfit,
                legendel_sigmoidal_areaofuncertainty],
-               ["raw data collected from source",
+              ["raw data collected from source",
                "data fitted to an exponential function",
                "area of uncertainty for the exponential fit",
                "data fitted to an sigmoidal function",
@@ -159,7 +168,7 @@ for l in range(regression_start, len(total_data_y)+4):
 initial_frame_repeatcount = 2
 final_frame_repeatcount = 7
 
-video_name = 'video.avi'
+video_name = 'video.mp4'
 
 frame = cv2.imread("./" + str(regression_start) + ".png")
 height, width, layers = frame.shape
