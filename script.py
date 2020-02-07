@@ -15,7 +15,7 @@ from uncertainties import ufloat
 # to add another date simply append the # of infected people
 total_data_y = [45, 62, 121, 198, 291, 440, 571,
                 830, 1287, 1975, 2744, 4515, 5974, 7711, 9692,
-                11791, 14380, 17205, 20438, 24324, 28018]
+                11791, 14380, 17205, 20438, 24324, 28018, 31161]
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
