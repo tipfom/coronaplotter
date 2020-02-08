@@ -15,7 +15,7 @@ from uncertainties import ufloat
 # to add another date simply append the # of infected people
 total_data_y = [45, 62, 121, 198, 291, 440, 571,
                 830, 1287, 1975, 2744, 4515, 5974, 7711, 9692,
-                11791, 14380, 17205, 20438, 24324, 28018, 31161]
+                11791, 14380, 17205, 20438, 24324, 28018, 31161, 34546]
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -32,12 +32,12 @@ def sigmoidal_fit_function(x, a, b, c):
     return a/(1+np.exp(-b*(x-c)))
 
 regression_start = 5 # index to 
-exponential_stop = len(total_data_y) # index to stop plotting the exponential fit
+exponential_stop = len(total_data_y)+1 # index to stop plotting the exponential fit
 sigmoidal_start = 13 # index to start plotting the sigmoidal fit
 
 # x-axis range
 xmin = 0
-xmax = 22
+xmax = 24
 # steps between major ticks on x-axi
 xstep = 3
 
