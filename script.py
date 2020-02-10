@@ -13,9 +13,10 @@ from uncertainties import ufloat
 
 # data points, cummulative 
 # to add another date simply append the # of infected people
-total_data_y = [45, 62, 121, 198, 291, 440, 571,
-                830, 1287, 1975, 2744, 4515, 5974, 7711, 9692,
-                11791, 14380, 17205, 20438, 24324, 28018, 31161, 34546]
+total_data_y = [45, 62, 121, 198, 291, 440, 571, 830, 1287, 
+                1975, 2744, 4515, 5974, 7711, 9692, 11791, 
+                14380, 17205, 20438, 24324, 28018, 31161, 
+                34546, 37198, 40171]
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -37,9 +38,9 @@ sigmoidal_start = 13 # index to start plotting the sigmoidal fit
 
 # x-axis range
 xmin = 0
-xmax = 24
+xmax = 28
 # steps between major ticks on x-axi
-xstep = 3
+xstep = 4
 
 # create animation frames
 for l in range(regression_start, len(total_data_y)+4):
