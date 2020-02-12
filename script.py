@@ -11,17 +11,24 @@ from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
 from uncertainties import ufloat
 
-# data points, cummulative 
+# data points, cummulative
 # to add another date simply append the # of infected people
-total_data_y = [45, 62, 121, 198, 291, 440, 571, 830, 1287, 
-                1975, 2744, 4515, 5974, 7711, 9692, 11791, 
-                14380, 17205, 20438, 24324, 28018, 31161, 
-                34546, 37198, 40171]
+total_data_y = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
+                1975, 2744, 4515, 5974, 7711, 9692, 11791,
+                14380, 17205, 20438, 24324, 28018, 31161,
+                34546, 37198, 40171, 42638, 44653]
+
+relative_growth_y = []
+for i in range(len(total_data_y)-1):
+    relative_growth_y.append(total_data_y[i+1]/total_data_y[i]-1)
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
 matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
+
+#plt.style.use('light_background')
+
 
 # function definition for the exponential fit with parameters a, b
 def exponential_fit_function(x, a, b):
@@ -32,22 +39,30 @@ def exponential_fit_function(x, a, b):
 def sigmoidal_fit_function(x, a, b, c):
     return a/(1+np.exp(-b*(x-c)))
 
-regression_start = 5 # index to 
-exponential_stop = len(total_data_y)+1 # index to stop plotting the exponential fit
-sigmoidal_start = 13 # index to start plotting the sigmoidal fit
+
+regression_start = 5  # index to
+# index to stop plotting the exponential fit
+exponential_stop = len(total_data_y)+1
+sigmoidal_start = 13  # index to start plotting the sigmoidal fit
 
 # x-axis range
 xmin = 0
-xmax = 28
+xmax = 30
 # steps between major ticks on x-axi
 xstep = 4
 
+# colors
+exponential_color = np.array([30, 136, 229]) / 255
+sigmoidal_color = np.array([222, 167, 2]) / 255
+data_color =  np.array([0, 0, 0]) / 255
+change_color = np.array([216, 27, 96]) / 255
+
 # create animation frames
 for l in range(regression_start, len(total_data_y)+4):
-    i = l # index of the last data point to be used
-    n = 3 # number of previous fits to include
-    
-    if l > len(total_data_y): # used to fade out the last three plots
+    i = l  # index of the last data point to be used
+    n = 3  # number of previous fits to include
+
+    if l > len(total_data_y):  # used to fade out the last three plots
         i = len(total_data_y)
         n = 3 - (l - i)
 
@@ -55,11 +70,12 @@ for l in range(regression_start, len(total_data_y)+4):
     data_y = total_data_y[0:i]
 
     # creation of pyplot plot
-    fig, ax = plt.subplots()
+    fig, ax2 = plt.subplots()
+    ax1 = ax2.twinx()
 
     # setting the dimensions (basically resolution with 12by9 aspect ratio)
     fig.set_figheight(10)
-    fig.set_figwidth(10*12/9)
+    fig.set_figwidth(12)
 
     majxticks = ([], [])
     # generation of x-axis tick-names
@@ -69,29 +85,35 @@ for l in range(regression_start, len(total_data_y)+4):
         majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
 
     # setting the x-axis ticks
-    ax.set_xlim([xmin, xmax])
+    ax1.set_xlim([xmin, xmax])
     plt.xticks(majxticks[0], majxticks[1])
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.tick_params(axis="both", which="major", length=8, width=1.5)
-    ax.tick_params(axis="both", which="minor", length=5, width=1)
+    ax1.xaxis.set_minor_locator(MultipleLocator(1))
+    ax1.tick_params(axis="x", which="major", length=8, width=1.5)
+    ax1.tick_params(axis="x", which="minor", length=5, width=1)
 
     # setting the y-axis ticks
-    plt.yticks([0, 10000, 20000, 30000, 40000, 50000], [
-               "0", "10k", "20k", "30k", "40k", "50k"])
-    ax.yaxis.set_minor_locator(MultipleLocator(5000))
+    ax1.set_yticks([0, 10000, 20000, 30000, 40000, 50000])
+    ax1.set_yticklabels(["0", "10k", "20k", "30k", "40k", "50k "])
+    ax1.yaxis.set_minor_locator(MultipleLocator(5000))
+
+    ax2.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax2.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
+    ax2.yaxis.set_minor_locator(MultipleLocator(0.1))
 
     # setting the y-axis limit
-    ax.set_ylim([0, 50000])
-    
+    ax1.set_ylim([0, 50000])
+    ax2.set_ylim([0, 1])
+
     # label axis
     plt.xlabel("date")
-    plt.ylabel("total # of confirmed infections in Mainland China")
+    ax1.set_ylabel("total # of confirmed infections in Mainland China")
+    ax2.set_ylabel("relative growth")
 
-    #plot the original data
-    plt.plot(data_x, data_y, "s", color="black",
+    # plot the original data
+    ax1.plot(data_x, data_y, "s", color=data_color,
              label="raw data collected from source")
 
-    # create the exponential plots 
+    # create the exponential plots
     for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
         # fit the exponential function
         popt, pcov = scipy.optimize.curve_fit(
@@ -116,21 +138,21 @@ for l in range(regression_start, len(total_data_y)+4):
             print("a = " + str(a))
             print("b = " + str(b))
 
-            plt.plot(nom_x, nom_y, color="blue", linewidth=2,
+            ax1.plot(nom_x, nom_y, color=exponential_color, linewidth=2,
                      label="data fitted to an exponential function")
-            ax.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor="blue",
-                            alpha=0.3, label="area of uncertainty for the exponential fit")
+            ax1.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=exponential_color,
+                             alpha=0.3, label="area of uncertainty for the exponential fit")
         elif k == i-1:
-            ax.fill_between(nom_x, nom_y - std_y, nom_y +
-                            std_y, facecolor="blue", alpha=0.1)
+            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
+                             std_y, facecolor=exponential_color, alpha=0.2)
         elif k == i-2:
-            ax.fill_between(nom_x, nom_y - std_y, nom_y +
-                            std_y, facecolor="blue", alpha=0.05)
+            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
+                             std_y, facecolor=exponential_color, alpha=0.05)
 
     for k in range(np.max([i-n, sigmoidal_start]), i+1):
         # fit the sigmoidal function
         popt, pcov = scipy.optimize.curve_fit(
-            sigmoidal_fit_function,  data_x[0:k],  data_y[0:k], p0=[60000, 0.4, 20])
+            sigmoidal_fit_function,  data_x[8:k],  data_y[8:k], p0=[60000, 0.4, 20])
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
@@ -152,63 +174,71 @@ for l in range(regression_start, len(total_data_y)+4):
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            plt.plot(nom_x, nom_y, color="orange", linewidth=2,
+            ax1.plot(nom_x, nom_y, color=sigmoidal_color, linewidth=2,
                      label="data fitted to an sigmoidal function")
-            ax.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor="orange",
-                            alpha=0.6, label="area of uncertainty for the sigmoidal fit")
+            ax1.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=sigmoidal_color,
+                             alpha=0.6, label="area of uncertainty for the sigmoidal fit")
         elif k == i-1:
-            ax.fill_between(nom_x, nom_y - std_y, nom_y +
-                            std_y, facecolor="orange", alpha=0.2)
+            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
+                             std_y, facecolor=sigmoidal_color, alpha=0.2)
         elif k == i-2:
-            ax.fill_between(nom_x, nom_y - std_y, nom_y +
-                            std_y, facecolor="orange", alpha=0.1)
+            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
+                             std_y, facecolor=sigmoidal_color, alpha=0.1)
+
+    ax2.plot(data_x[1:i], relative_growth_y[0:i-1], color=change_color, alpha=0.4, lw=2)
 
     # format the border of the diagram
-    ax.spines['bottom'].set_color('black')
-    ax.spines['top'].set_color('white')
-    ax.spines['right'].set_color('white')
-    ax.spines['left'].set_color('black')
+    ax1.spines['top'].set_color('white')
+    ax2.spines['top'].set_color('white')
 
     # these objects are used to create a consistent legend
-    legendel_originaldata = Line2D([0], [0], marker='s', color='black',
-                                   lw=0, label='Scatter', markerfacecolor='black', markersize=10)
+    legendel_originaldata = Line2D([0], [0], marker='s', color=data_color,
+                                   lw=0, label='Scatter', markerfacecolor=data_color, markersize=10)
     legendel_exponentialfit = Line2D(
-        [0], [0], color='blue', lw=4, label='Line')
+        [0], [0], color=exponential_color, lw=4, label='Line')
     legendel_sigmoidalfit = Line2D(
-        [0], [0], color='orange', lw=4, label='Line')
+        [0], [0], color=sigmoidal_color, lw=4, label='Line')
     legendel_exponential_areaofuncertainty = Patch(
-        facecolor='blue', alpha=0.5, label="e")
+        facecolor=exponential_color, alpha=0.5, label="e")
     legendel_sigmoidal_areaofuncertainty = Patch(
-        facecolor='orange', alpha=0.5, label="d")
+        facecolor=sigmoidal_color, alpha=0.5, label="d")
+    legendel_relchange = Line2D(
+        [0], [0], color=change_color, lw=4, label='Line')    
 
     # add the legend and object descriptions
-    ax.legend([legendel_originaldata,
-               legendel_exponentialfit,
-               legendel_exponential_areaofuncertainty,
-               legendel_sigmoidalfit,
-               legendel_sigmoidal_areaofuncertainty],
-              ["raw data collected from source",
-               "data fitted to an exponential function",
-               "area of uncertainty for the exponential fit",
-               "data fitted to an sigmoidal function",
-               "area of uncertainty for the sigmoidal fit"], loc='upper left').get_frame().set_edgecolor("black")
+    legend = ax2.legend([legendel_originaldata,
+                         legendel_exponentialfit,
+                         legendel_exponential_areaofuncertainty,
+                         legendel_sigmoidalfit,
+                         legendel_sigmoidal_areaofuncertainty,
+                         legendel_relchange],
+                        ["raw data collected from source",
+                         "data fitted to an exponential function",
+                         "area of uncertainty for the exponential fit",
+                         "data fitted to an sigmoidal function",
+                         "area of uncertainty for the sigmoidal fit",
+                         "relative growth"], loc='upper left')
+    legend.get_frame().set_edgecolor("black")
+    legend.set_zorder(20)
     plt.title("see comments for further explanations")
+    
+    plt.tight_layout()
 
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
 
 # batch the images to a video
-initial_frame_repeatcount = 2 # number of times the initial frame is to be repeated
-final_frame_repeatcount = 7 # number of times the final frame is to be repeated
+initial_frame_repeatcount = 2  # number of times the initial frame is to be repeated
+final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 
-video_name = 'video.mp4' # name of the exported video
+video_name = 'video.mp4'  # name of the exported video
 
 # get video size data
 frame = cv2.imread("./" + str(regression_start) + ".png")
 height, width, layers = frame.shape
 
 # create video writer
-fps = 3
+fps = 2.5
 video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
