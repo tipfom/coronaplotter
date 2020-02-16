@@ -16,7 +16,9 @@ from uncertainties import ufloat
 total_data_y = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
                 1975, 2744, 4515, 5974, 7711, 9692, 11791,
                 14380, 17205, 20438, 24324, 28018, 31161,
-                34546, 37198, 40171, 42638, 44653]
+                34546, 37198, 40171, 42638, 44653, 46551,
+                48467, 49970, 51091]
+total_data_y_including_cd = [58761, 63851, 66492, 68500]
 
 relative_growth_y = []
 for i in range(len(total_data_y)-1):
@@ -27,7 +29,7 @@ font = {'family': 'normal', 'weight': 'normal', 'size': 16}
 matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
 
-#plt.style.use('light_background')
+# plt.style.use('light_background')
 
 
 # function definition for the exponential fit with parameters a, b
@@ -44,18 +46,20 @@ regression_start = 5  # index to
 # index to stop plotting the exponential fit
 exponential_stop = len(total_data_y)+1
 sigmoidal_start = 13  # index to start plotting the sigmoidal fit
+cd_start = 27  # start of including clinical diagnosis
 
 # x-axis range
 xmin = 0
-xmax = 30
+xmax = 32
 # steps between major ticks on x-axi
 xstep = 4
 
 # colors
 exponential_color = np.array([30, 136, 229]) / 255
 sigmoidal_color = np.array([222, 167, 2]) / 255
-data_color =  np.array([0, 0, 0]) / 255
+data_color = np.array([0, 0, 0]) / 255
 change_color = np.array([216, 27, 96]) / 255
+cd_color = np.array([93, 93, 93]) / 255
 
 # create animation frames
 for l in range(regression_start, len(total_data_y)+4):
@@ -92,8 +96,8 @@ for l in range(regression_start, len(total_data_y)+4):
     ax1.tick_params(axis="x", which="minor", length=5, width=1)
 
     # setting the y-axis ticks
-    ax1.set_yticks([0, 10000, 20000, 30000, 40000, 50000])
-    ax1.set_yticklabels(["0", "10k", "20k", "30k", "40k", "50k "])
+    ax1.set_yticks([0, 10000, 20000, 30000, 40000, 50000, 60000, 70000])
+    ax1.set_yticklabels(["0", "10k", "20k", "30k", "40k", "50k", "60k", "70k"])
     ax1.yaxis.set_minor_locator(MultipleLocator(5000))
 
     ax2.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
@@ -101,7 +105,7 @@ for l in range(regression_start, len(total_data_y)+4):
     ax2.yaxis.set_minor_locator(MultipleLocator(0.1))
 
     # setting the y-axis limit
-    ax1.set_ylim([0, 50000])
+    ax1.set_ylim([0, 70000])
     ax2.set_ylim([0, 1])
 
     # label axis
@@ -112,6 +116,10 @@ for l in range(regression_start, len(total_data_y)+4):
     # plot the original data
     ax1.plot(data_x, data_y, "s", color=data_color,
              label="raw data collected from source")
+
+    if i > cd_start:
+        ax1.plot(
+            data_x[cd_start:i], total_data_y_including_cd[0:i-cd_start], "s", color=cd_color)
 
     # create the exponential plots
     for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
@@ -185,7 +193,8 @@ for l in range(regression_start, len(total_data_y)+4):
             ax1.fill_between(nom_x, nom_y - std_y, nom_y +
                              std_y, facecolor=sigmoidal_color, alpha=0.1)
 
-    ax2.plot(data_x[1:i], relative_growth_y[0:i-1], color=change_color, alpha=0.4, lw=2)
+    ax2.plot(data_x[1:i], relative_growth_y[0:i-1],
+             color=change_color, alpha=0.4, lw=2)
 
     # format the border of the diagram
     ax1.spines['top'].set_color('white')
@@ -194,6 +203,8 @@ for l in range(regression_start, len(total_data_y)+4):
     # these objects are used to create a consistent legend
     legendel_originaldata = Line2D([0], [0], marker='s', color=data_color,
                                    lw=0, label='Scatter', markerfacecolor=data_color, markersize=10)
+    legendel_cddata = Line2D([0], [0], marker='s', color=cd_color,
+                             lw=0, label='Scatter', markerfacecolor=cd_color, markersize=10)
     legendel_exponentialfit = Line2D(
         [0], [0], color=exponential_color, lw=4, label='Line')
     legendel_sigmoidalfit = Line2D(
@@ -203,25 +214,27 @@ for l in range(regression_start, len(total_data_y)+4):
     legendel_sigmoidal_areaofuncertainty = Patch(
         facecolor=sigmoidal_color, alpha=0.5, label="d")
     legendel_relchange = Line2D(
-        [0], [0], color=change_color, lw=4, label='Line')    
+        [0], [0], color=change_color, lw=4, label='Line')
 
     # add the legend and object descriptions
     legend = ax2.legend([legendel_originaldata,
+                         legendel_cddata,
                          legendel_exponentialfit,
                          legendel_exponential_areaofuncertainty,
                          legendel_sigmoidalfit,
                          legendel_sigmoidal_areaofuncertainty,
                          legendel_relchange],
-                        ["raw data collected from source",
+                        ["data excluding clinical diagnosis",
+                         "data including clinical diagnosis",
                          "data fitted to an exponential function",
-                         "area of uncertainty for the exponential fit",
+                         "95% area of uncertainty for the exponential fit",
                          "data fitted to an sigmoidal function",
-                         "area of uncertainty for the sigmoidal fit",
+                         "95% area of uncertainty for the sigmoidal fit",
                          "relative growth"], loc='upper left')
     legend.get_frame().set_edgecolor("black")
     legend.set_zorder(20)
     plt.title("see comments for further explanations")
-    
+
     plt.tight_layout()
 
     # save the plot in the current folder
@@ -238,7 +251,7 @@ frame = cv2.imread("./" + str(regression_start) + ".png")
 height, width, layers = frame.shape
 
 # create video writer
-fps = 2.5
+fps = 3
 video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
