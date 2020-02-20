@@ -13,16 +13,15 @@ from uncertainties import ufloat
 
 # data points, cummulative
 # to add another date simply append the # of infected people
-total_data_y = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
+pre_cd_data = np.array([45, 62, 121, 198, 291, 440, 571, 830, 1287,
                 1975, 2744, 4515, 5974, 7711, 9692, 11791,
                 14380, 17205, 20438, 24324, 28018, 31161,
-                34546, 37198, 40171, 42638, 44653, 46551,
-                48467, 49970, 51091, 70548]
-total_data_y_including_cd = [58761, 63851, 66492, 68500, 70548]
+                34546, 37198, 40171, 42638, 44653, 46472 ])
+post_cd_data = np.append((pre_cd_data * 1.33), [63851, 66492, 68500, 70548, 72436, 73906, 74576])
 
 relative_growth_y = []
-for i in range(len(total_data_y)-1):
-    relative_growth_y.append(total_data_y[i+1]/total_data_y[i]-1)
+for i in range(len(post_cd_data)-1):
+    relative_growth_y.append(post_cd_data[i+1]/post_cd_data[i]-1)
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -44,15 +43,14 @@ def sigmoidal_fit_function(x, a, b, c):
 
 regression_start = 5  # index to
 # index to stop plotting the exponential fit
-exponential_stop = len(total_data_y)+1
+exponential_stop = len(post_cd_data)+1
 sigmoidal_start = 13  # index to start plotting the sigmoidal fit
-cd_start = 27  # start of including clinical diagnosis
 
 # x-axis range
 xmin = 0
-xmax = 32
+xmax = 40
 # steps between major ticks on x-axi
-xstep = 4
+xstep = 7
 
 # colors
 exponential_color = np.array([30, 136, 229]) / 255
@@ -62,16 +60,16 @@ change_color = np.array([216, 27, 96]) / 255
 cd_color = np.array([93, 93, 93]) / 255
 
 # create animation frames
-for l in range(regression_start, len(total_data_y)+4):
+for l in range(regression_start, len(post_cd_data)+4):
     i = l  # index of the last data point to be used
     n = 3  # number of previous fits to include
 
-    if l > len(total_data_y):  # used to fade out the last three plots
-        i = len(total_data_y)
+    if l > len(post_cd_data):  # used to fade out the last three plots
+        i = len(post_cd_data)
         n = 3 - (l - i)
 
     data_x = np.arange(0, i)
-    data_y = total_data_y[0:i]
+    data_y = post_cd_data[0:i]
 
     # creation of pyplot plot
     fig, ax2 = plt.subplots()
@@ -96,16 +94,16 @@ for l in range(regression_start, len(total_data_y)+4):
     ax1.tick_params(axis="x", which="minor", length=5, width=1)
 
     # setting the y-axis ticks
-    ax1.set_yticks([0, 10000, 20000, 30000, 40000, 50000, 60000, 70000])
-    ax1.set_yticklabels(["0", "10k", "20k", "30k", "40k", "50k", "60k", "70k"])
-    ax1.yaxis.set_minor_locator(MultipleLocator(5000))
+    ax1.set_yticks([0, 20000, 40000, 60000, 80000, 100000])
+    ax1.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k"])
+    ax1.yaxis.set_minor_locator(MultipleLocator(10000))
 
     ax2.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax2.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
     ax2.yaxis.set_minor_locator(MultipleLocator(0.1))
 
     # setting the y-axis limit
-    ax1.set_ylim([0, 70000])
+    ax1.set_ylim([0, 100000])
     ax2.set_ylim([0, 1])
 
     # label axis
@@ -117,9 +115,8 @@ for l in range(regression_start, len(total_data_y)+4):
     ax1.plot(data_x, data_y, "s", color=data_color,
              label="raw data collected from source")
 
-    if i > cd_start:
-        ax1.plot(
-            data_x[cd_start:i], total_data_y_including_cd[0:i-cd_start], "s", color=cd_color)
+    pre_cd_index = np.min([i,len(pre_cd_data)])
+    ax1.plot(data_x[0:pre_cd_index], pre_cd_data[0:pre_cd_index], "s", color=cd_color)
 
     # create the exponential plots
     for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
@@ -224,8 +221,8 @@ for l in range(regression_start, len(total_data_y)+4):
                          legendel_sigmoidalfit,
                          legendel_sigmoidal_areaofuncertainty,
                          legendel_relchange],
-                        ["data excluding clinical diagnosis",
-                         "data including clinical diagnosis",
+                        ["data adjusted to connect to clinical diagnosis",
+                         "original data",
                          "data fitted to an exponential function",
                          "95% area of uncertainty for the exponential fit",
                          "data fitted to an sigmoidal function",
@@ -239,12 +236,13 @@ for l in range(regression_start, len(total_data_y)+4):
 
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
+    plt.close()
 
 # batch the images to a video
 initial_frame_repeatcount = 2  # number of times the initial frame is to be repeated
 final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 
-video_name = 'video.mp4'  # name of the exported video
+video_name = 'video.avi'  # name of the exported video
 
 # get video size data
 frame = cv2.imread("./" + str(regression_start) + ".png")
@@ -259,12 +257,12 @@ for i in range(0, initial_frame_repeatcount):
     video.write(cv2.imread("./" + str(regression_start) + ".png"))
 
 # animation frames
-for i in range(regression_start + 1, len(total_data_y)+3):
+for i in range(regression_start + 1, len(post_cd_data)+3):
     video.write(cv2.imread("./" + str(i) + ".png"))
 
 # write final frame repeatedly
 for i in range(0, final_frame_repeatcount):
-    video.write(cv2.imread("./" + str(len(total_data_y)+3) + ".png"))
+    video.write(cv2.imread("./" + str(len(post_cd_data)+3) + ".png"))
 
 # save video
 cv2.destroyAllWindows()
