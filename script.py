@@ -14,10 +14,13 @@ from uncertainties import ufloat
 # data points, cummulative
 # to add another date simply append the # of infected people
 pre_cd_data = np.array([45, 62, 121, 198, 291, 440, 571, 830, 1287,
-                1975, 2744, 4515, 5974, 7711, 9692, 11791,
-                14380, 17205, 20438, 24324, 28018, 31161,
-                34546, 37198, 40171, 42638, 44653, 46472 ])
-post_cd_data = np.append((pre_cd_data * 1.33), [63851, 66492, 68500, 70548, 72436, 73906, 74576])
+                        1975, 2744, 4515, 5974, 7711, 9692, 11791,
+                        14380, 17205, 20438, 24324, 28018, 31161,
+                        34546, 37198, 40171, 42638, 44653, 46472])
+post_cd_data = np.append(
+    (pre_cd_data * 1.33),
+    [63851, 66492, 68500, 70548, 72436, 74185, 
+     75003, 75891, 76288, 76936, 77150])
 
 relative_growth_y = []
 for i in range(len(post_cd_data)-1):
@@ -48,7 +51,7 @@ sigmoidal_start = 13  # index to start plotting the sigmoidal fit
 
 # x-axis range
 xmin = 0
-xmax = 40
+xmax = 42
 # steps between major ticks on x-axi
 xstep = 7
 
@@ -112,11 +115,13 @@ for l in range(regression_start, len(post_cd_data)+4):
     ax2.set_ylabel("relative growth")
 
     # plot the original data
-    ax1.plot(data_x, data_y, "s", color=data_color,
+    ax1.plot(data_x, data_y, "s", color=data_color, markersize=7,
              label="raw data collected from source")
 
-    pre_cd_index = np.min([i,len(pre_cd_data)])
-    ax1.plot(data_x[0:pre_cd_index], pre_cd_data[0:pre_cd_index], "s", color=cd_color)
+    pre_cd_index = np.min([i, len(pre_cd_data)])
+    ax1.plot(data_x[0:pre_cd_index], pre_cd_data[0:pre_cd_index], color="none",
+             marker="o", markeredgecolor=cd_color, markersize=7, markeredgewidth=1.7,
+             markerfacecolor="none")
 
     # create the exponential plots
     for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
@@ -143,7 +148,7 @@ for l in range(regression_start, len(post_cd_data)+4):
             print("a = " + str(a))
             print("b = " + str(b))
 
-            ax1.plot(nom_x, nom_y, color=exponential_color, linewidth=2,
+            ax1.plot(nom_x, nom_y, color=exponential_color, linewidth=3,
                      label="data fitted to an exponential function")
             ax1.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=exponential_color,
                              alpha=0.3, label="area of uncertainty for the exponential fit")
@@ -157,7 +162,7 @@ for l in range(regression_start, len(post_cd_data)+4):
     for k in range(np.max([i-n, sigmoidal_start]), i+1):
         # fit the sigmoidal function
         popt, pcov = scipy.optimize.curve_fit(
-            sigmoidal_fit_function,  data_x[8:k],  data_y[8:k], p0=[60000, 0.4, 20])
+            sigmoidal_fit_function,  data_x[8:k],  data_y[8:k], p0=[80000, 0.4, 20])
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
@@ -179,7 +184,7 @@ for l in range(regression_start, len(post_cd_data)+4):
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            ax1.plot(nom_x, nom_y, color=sigmoidal_color, linewidth=2,
+            ax1.plot(nom_x, nom_y, color=sigmoidal_color, linewidth=3,
                      label="data fitted to an sigmoidal function")
             ax1.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=sigmoidal_color,
                              alpha=0.6, label="area of uncertainty for the sigmoidal fit")
@@ -200,8 +205,9 @@ for l in range(regression_start, len(post_cd_data)+4):
     # these objects are used to create a consistent legend
     legendel_originaldata = Line2D([0], [0], marker='s', color=data_color,
                                    lw=0, label='Scatter', markerfacecolor=data_color, markersize=10)
-    legendel_cddata = Line2D([0], [0], marker='s', color=cd_color,
-                             lw=0, label='Scatter', markerfacecolor=cd_color, markersize=10)
+    legendel_cddata = Line2D([0], [0], marker='o', color=cd_color,
+                             lw=0, label='Scatter', markeredgecolor=cd_color, markersize=10,
+                             markeredgewidth=1.7, markerfacecolor="none")
     legendel_exponentialfit = Line2D(
         [0], [0], color=exponential_color, lw=4, label='Line')
     legendel_sigmoidalfit = Line2D(
