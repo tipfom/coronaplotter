@@ -255,7 +255,7 @@ frame = cv2.imread("./" + str(regression_start) + ".png")
 height, width, layers = frame.shape
 
 # create video writer
-fps = 3
+fps = 4
 video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
