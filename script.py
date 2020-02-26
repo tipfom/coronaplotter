@@ -19,8 +19,13 @@ pre_cd_data = np.array([45, 62, 121, 198, 291, 440, 571, 830, 1287,
                         34546, 37198, 40171, 42638, 44653, 46472])
 post_cd_data = np.append(
     (pre_cd_data * 1.33),
-    [63851, 66492, 68500, 70548, 72436, 74185, 
-     75003, 75891, 76288, 76936, 77150, 77658])
+    [63851, 66492, 68500, 70548, 72436, 74185,
+     75003, 75891, 76288, 76936, 77150, 77658,
+     78064])
+
+# 25.Jan which means +9 from precd data
+row_data = [23, 29, 37, 56, 68, 82, 106, 132, 146, 153, 159, 191, 216, 270, 288, 307,
+            319, 395, 441, 447, 505, 526, 683, 794, 804, 924, 1073, 1200, 1402, 1769, 2069, 2459]
 
 relative_growth_y = []
 for i in range(len(post_cd_data)-1):
@@ -31,10 +36,9 @@ font = {'family': 'normal', 'weight': 'normal', 'size': 16}
 matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
 
-# plt.style.use('light_background')
-
-
 # function definition for the exponential fit with parameters a, b
+
+
 def exponential_fit_function(x, a, b):
     return a*np.exp(b*x)
 
@@ -46,8 +50,9 @@ def sigmoidal_fit_function(x, a, b, c):
 
 regression_start = 5  # index to
 # index to stop plotting the exponential fit
-exponential_stop = len(post_cd_data)+1
-sigmoidal_start = 13  # index to start plotting the sigmoidal fit
+exponential_stop = 16
+sigmoidal_start = 16  # index to start plotting the sigmoidal fit
+row_start = 9
 
 # x-axis range
 xmin = 0
@@ -77,6 +82,9 @@ for l in range(regression_start, len(post_cd_data)+4):
     # creation of pyplot plot
     fig, ax2 = plt.subplots()
     ax1 = ax2.twinx()
+    ax3 = ax2.twinx()
+
+    ax3.spines["right"].set_position(("axes", 1.1))
 
     # setting the dimensions (basically resolution with 12by9 aspect ratio)
     fig.set_figheight(10)
@@ -108,20 +116,20 @@ for l in range(regression_start, len(post_cd_data)+4):
     # setting the y-axis limit
     ax1.set_ylim([0, 100000])
     ax2.set_ylim([0, 1])
+    ax3.set_ylim([0, 3000])
 
     # label axis
     plt.xlabel("date")
     ax1.set_ylabel("total # of confirmed infections in Mainland China")
     ax2.set_ylabel("relative growth")
+    ax3.set_ylabel("total # of confirmed infections outside China")
 
     # plot the original data
     ax1.plot(data_x, data_y, "s", color=data_color, markersize=7,
              label="raw data collected from source")
 
-    pre_cd_index = np.min([i, len(pre_cd_data)])
-    ax1.plot(data_x[0:pre_cd_index], pre_cd_data[0:pre_cd_index], color="none",
-             marker="o", markeredgecolor=cd_color, markersize=7, markeredgewidth=1.7,
-             markerfacecolor="none")
+    if i > row_start:
+        ax3.plot(data_x[row_start: i], row_data[0:i-row_start], color="blue")
 
     # create the exponential plots
     for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
