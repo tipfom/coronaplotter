@@ -65,7 +65,7 @@ exponential_color = np.array([30, 136, 229]) / 255
 sigmoidal_color = np.array([222, 167, 2]) / 255
 data_color = np.array([0, 0, 0]) / 255
 change_color = np.array([216, 27, 96]) / 255
-cd_color = np.array([93, 93, 93]) / 255
+row_color = np.array([179, 0, 255]) / 255
 
 # create animation frames
 for l in range(regression_start, len(post_cd_data)+4):
@@ -80,11 +80,11 @@ for l in range(regression_start, len(post_cd_data)+4):
     data_y = post_cd_data[0:i]
 
     # creation of pyplot plot
-    fig, ax2 = plt.subplots()
-    ax1 = ax2.twinx()
-    ax3 = ax2.twinx()
+    fig, ax_relgrow = plt.subplots()
+    ax_abschina = ax_relgrow.twinx()
+    ax_absrow = ax_relgrow.twinx()
 
-    ax3.spines["right"].set_position(("axes", 1.1))
+    ax_absrow.spines["right"].set_position(("axes", 1.15))
 
     # setting the dimensions (basically resolution with 12by9 aspect ratio)
     fig.set_figheight(10)
@@ -98,38 +98,50 @@ for l in range(regression_start, len(post_cd_data)+4):
         majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
 
     # setting the x-axis ticks
-    ax1.set_xlim([xmin, xmax])
+    ax_abschina.set_xlim([xmin, xmax])
     plt.xticks(majxticks[0], majxticks[1])
-    ax1.xaxis.set_minor_locator(MultipleLocator(1))
-    ax1.tick_params(axis="x", which="major", length=8, width=1.5)
-    ax1.tick_params(axis="x", which="minor", length=5, width=1)
+    ax_abschina.xaxis.set_minor_locator(MultipleLocator(1))
+    ax_abschina.tick_params(axis="x", which="major", length=8, width=1.5)
+    ax_abschina.tick_params(axis="x", which="minor", length=5, width=1)
 
     # setting the y-axis ticks
-    ax1.set_yticks([0, 20000, 40000, 60000, 80000, 100000])
-    ax1.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k"])
-    ax1.yaxis.set_minor_locator(MultipleLocator(10000))
+    ax_abschina.set_yticks([0, 20000, 40000, 60000, 80000, 100000])
+    ax_abschina.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k"])
+    ax_abschina.yaxis.set_minor_locator(MultipleLocator(10000))
 
-    ax2.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-    ax2.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
-    ax2.yaxis.set_minor_locator(MultipleLocator(0.1))
+    ax_relgrow.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    ax_relgrow.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
+    ax_relgrow.yaxis.set_minor_locator(MultipleLocator(0.1))
+
+    ax_absrow.set_yticks([0, 1000, 2000, 3000, 4000, 5000])
+    ax_absrow.set_yticklabels(["0", "1k", "2k", "3k", "4k", "5k"])
+    ax_absrow.yaxis.set_minor_locator(MultipleLocator(500))
 
     # setting the y-axis limit
-    ax1.set_ylim([0, 100000])
-    ax2.set_ylim([0, 1])
-    ax3.set_ylim([0, 3000])
+    ax_abschina.set_ylim([0, 100000])
+    ax_relgrow.set_ylim([0, 1])
+    ax_absrow.set_ylim([0, 5000])
 
     # label axis
     plt.xlabel("date")
-    ax1.set_ylabel("total # of confirmed infections in Mainland China")
-    ax2.set_ylabel("relative growth")
-    ax3.set_ylabel("total # of confirmed infections outside China")
+    ax_abschina.set_ylabel("total # of confirmed infections in Mainland China")
+    ax_relgrow.set_ylabel("relative growth of infections in China")
+    ax_absrow.set_ylabel("total # of confirmed infections outside China")
+
+    ax_relgrow.tick_params(axis="y",colors=change_color)
+    ax_relgrow.yaxis.label.set_color(change_color)
+
+    ax_absrow.tick_params(axis="y",colors=row_color)
+    ax_absrow.yaxis.label.set_color(row_color)
+
 
     # plot the original data
-    ax1.plot(data_x, data_y, "s", color=data_color, markersize=7,
-             label="raw data collected from source")
+    ax_abschina.plot(data_x, data_y, "s", color=data_color,
+                     markersize=7, zorder=10)
 
     if i > row_start:
-        ax3.plot(data_x[row_start: i], row_data[0:i-row_start], color="blue")
+        ax_absrow.plot(data_x[row_start: i], row_data[0:i -
+                                                      row_start], lw=4, color=row_color, zorder=10)
 
     # create the exponential plots
     for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
@@ -156,16 +168,16 @@ for l in range(regression_start, len(post_cd_data)+4):
             print("a = " + str(a))
             print("b = " + str(b))
 
-            ax1.plot(nom_x, nom_y, color=exponential_color, linewidth=3,
-                     label="data fitted to an exponential function")
-            ax1.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=exponential_color,
-                             alpha=0.3, label="area of uncertainty for the exponential fit")
+            ax_abschina.plot(nom_x, nom_y, color=exponential_color, linewidth=3,
+                             label="data fitted to an exponential function")
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=exponential_color,
+                                     alpha=0.3, label="area of uncertainty for the exponential fit")
         elif k == i-1:
-            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
-                             std_y, facecolor=exponential_color, alpha=0.2)
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
+                                     std_y, facecolor=exponential_color, alpha=0.2)
         elif k == i-2:
-            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
-                             std_y, facecolor=exponential_color, alpha=0.05)
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
+                                     std_y, facecolor=exponential_color, alpha=0.05)
 
     for k in range(np.max([i-n, sigmoidal_start]), i+1):
         # fit the sigmoidal function
@@ -192,56 +204,61 @@ for l in range(regression_start, len(post_cd_data)+4):
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            ax1.plot(nom_x, nom_y, color=sigmoidal_color, linewidth=3,
-                     label="data fitted to an sigmoidal function")
-            ax1.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=sigmoidal_color,
-                             alpha=0.6, label="area of uncertainty for the sigmoidal fit")
+            ax_abschina.plot(nom_x, nom_y, color=sigmoidal_color, linewidth=3,
+                             label="data fitted to an sigmoidal function")
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=sigmoidal_color,
+                                     alpha=0.6, label="area of uncertainty for the sigmoidal fit")
         elif k == i-1:
-            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
-                             std_y, facecolor=sigmoidal_color, alpha=0.2)
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
+                                     std_y, facecolor=sigmoidal_color, alpha=0.2)
         elif k == i-2:
-            ax1.fill_between(nom_x, nom_y - std_y, nom_y +
-                             std_y, facecolor=sigmoidal_color, alpha=0.1)
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
+                                     std_y, facecolor=sigmoidal_color, alpha=0.1)
 
-    ax2.plot(data_x[1:i], relative_growth_y[0:i-1],
-             color=change_color, alpha=0.4, lw=2)
+    ax_relgrow.plot(data_x[1:i], relative_growth_y[0:i-1],
+                    color=change_color, alpha=0.4, lw=2)
 
     # format the border of the diagram
-    ax1.spines['top'].set_color('white')
-    ax2.spines['top'].set_color('white')
+    ax_abschina.spines['top'].set_color('white')
+    ax_relgrow.spines['top'].set_color('white')
+    ax_absrow.spines['top'].set_color('white')
+
+    ax_relgrow.spines['left'].set_color(change_color)
+    ax_absrow.spines['left'].set_color([0, 0, 0, 0])
+    ax_abschina.spines['left'].set_color([0, 0, 0, 0])
+
+    ax_absrow.spines['right'].set_color(row_color)
 
     # these objects are used to create a consistent legend
-    legendel_originaldata = Line2D([0], [0], marker='s', color=data_color,
-                                   lw=0, label='Scatter', markerfacecolor=data_color, markersize=10)
-    legendel_cddata = Line2D([0], [0], marker='o', color=cd_color,
-                             lw=0, label='Scatter', markeredgecolor=cd_color, markersize=10,
-                             markeredgewidth=1.7, markerfacecolor="none")
+    legendel_chinadata = Line2D([0], [0], marker='s', color=data_color,
+                                lw=0, markerfacecolor=data_color, markersize=10)
+    legendel_rowdata = Line2D([0], [0], color=row_color, lw=4)
     legendel_exponentialfit = Line2D(
-        [0], [0], color=exponential_color, lw=4, label='Line')
+        [0], [0], color=exponential_color, lw=4)
     legendel_sigmoidalfit = Line2D(
-        [0], [0], color=sigmoidal_color, lw=4, label='Line')
+        [0], [0], color=sigmoidal_color, lw=4)
     legendel_exponential_areaofuncertainty = Patch(
-        facecolor=exponential_color, alpha=0.5, label="e")
+        facecolor=exponential_color, alpha=0.5)
     legendel_sigmoidal_areaofuncertainty = Patch(
-        facecolor=sigmoidal_color, alpha=0.5, label="d")
+        facecolor=sigmoidal_color, alpha=0.5)
     legendel_relchange = Line2D(
-        [0], [0], color=change_color, lw=4, label='Line')
+        [0], [0], color=change_color, lw=4)
 
     # add the legend and object descriptions
-    legend = ax2.legend([legendel_originaldata,
-                         legendel_cddata,
-                         legendel_exponentialfit,
-                         legendel_exponential_areaofuncertainty,
-                         legendel_sigmoidalfit,
-                         legendel_sigmoidal_areaofuncertainty,
-                         legendel_relchange],
-                        ["data adjusted to connect to clinical diagnosis",
-                         "original data",
-                         "data fitted to an exponential function",
-                         "95% area of uncertainty for the exponential fit",
-                         "data fitted to an sigmoidal function",
-                         "95% area of uncertainty for the sigmoidal fit",
-                         "relative growth"], loc='upper left')
+    legend = ax_relgrow.legend([legendel_chinadata,
+                                legendel_rowdata,
+                                legendel_exponentialfit,
+                                legendel_exponential_areaofuncertainty,
+                                legendel_sigmoidalfit,
+                                legendel_sigmoidal_areaofuncertainty,
+                                legendel_relchange],
+                               ["total infections in China (adjusted)",
+                                "total infections outside China",
+                                "data fitted to an exponential function",
+                                "95% area of uncertainty for the exponential fit",
+                                "data fitted to an sigmoidal function",
+                                "95% area of uncertainty for the sigmoidal fit",
+                                "relative growth"], loc='upper left')
     legend.get_frame().set_edgecolor("black")
     legend.set_zorder(20)
     plt.title("see comments for further explanations")
