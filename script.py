@@ -13,23 +13,29 @@ from uncertainties import ufloat
 
 # data points, cummulative
 # to add another date simply append the # of infected people
-pre_cd_data = np.array([45, 62, 121, 198, 291, 440, 571, 830, 1287,
-                        1975, 2744, 4515, 5974, 7711, 9692, 11791,
-                        14380, 17205, 20438, 24324, 28018, 31161,
-                        34546, 37198, 40171, 42638, 44653, 46472])
-post_cd_data = np.append(
-    (pre_cd_data * 1.33),
-    [63851, 66492, 68500, 70548, 72436, 74185,
-     75003, 75891, 76288, 76936, 77150, 77658,
-     78064])
+
+china_data = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
+              1975, 2744, 4515, 5974, 7711, 9692, 11791,
+              14380, 17205, 20438, 24324, 28018, 31161,
+              34546, 37198, 40171, 42638, 44653, 46472,
+              63851, 66492, 68500, 70548, 72436, 74185,
+              75003, 75891, 76288, 76936, 77150, 77658,
+              78064, 78497]
 
 # 25.Jan which means +9 from precd data
-row_data = [23, 29, 37, 56, 68, 82, 106, 132, 146, 153, 159, 191, 216, 270, 288, 307,
-            319, 395, 441, 447, 505, 526, 683, 794, 804, 924, 1073, 1200, 1402, 1769, 2069, 2459]
+row_data = [23, 29, 37, 56, 68, 82, 106, 132, 146, 153, 159, 
+            191, 216, 270, 288, 307, 319, 395, 441, 447, 505, 
+            526, 683, 794, 804, 924, 1073, 1200, 1402, 1769,
+            2069, 2459, 2918]
 
-relative_growth_y = []
-for i in range(len(post_cd_data)-1):
-    relative_growth_y.append(post_cd_data[i+1]/post_cd_data[i]-1)
+china_relgrowth = []
+for current_date_index in range(len(china_data)-1):
+    china_relgrowth.append(china_data[current_date_index+1]/china_data[current_date_index]-1)
+
+row_relgrowth = []
+for current_date_index in range(len(row_data)-1):
+    row_relgrowth.append(row_data[current_date_index+1]/row_data[current_date_index]-1)
+
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -39,45 +45,50 @@ plt.rc('axes', labelsize=20)
 # function definition for the exponential fit with parameters a, b
 
 
-def exponential_fit_function(x, a, b):
-    return a*np.exp(b*x)
+def row_fit_function(x, a, b):
+    return a*np.exp(b*x)  # exponential
 
 
 # function definition for the sigmoidal fit with parameters a, b, c
-def sigmoidal_fit_function(x, a, b, c):
-    return a/(1+np.exp(-b*(x-c)))
+def china_fit_function(x, a, b, c):
+    return a/(1+np.exp(-b*(x-c)))  # sigmoidal
 
 
-regression_start = 5  # index to
-# index to stop plotting the exponential fit
-exponential_stop = 16
-sigmoidal_start = 16  # index to start plotting the sigmoidal fit
-row_start = 9
+plot_start = 11  
+row_data_start = 9
+china_regression_start = 16  # index to start plotting the sigmoidal fit
+row_regression_start = 11
 
 # x-axis range
 xmin = 0
-xmax = 42
+xmax = 47
 # steps between major ticks on x-axi
 xstep = 7
 
 # colors
-exponential_color = np.array([30, 136, 229]) / 255
-sigmoidal_color = np.array([222, 167, 2]) / 255
-data_color = np.array([0, 0, 0]) / 255
-change_color = np.array([216, 27, 96]) / 255
+china_color = np.array([0, 0, 0]) / 255
+china_growth_color = np.array([0, 0, 0]) / 255
+china_regression_color = np.array([222, 167, 2]) / 255
+
 row_color = np.array([179, 0, 255]) / 255
+row_growth_color = np.array([216, 27, 96]) / 255
+row_regression_color = np.array([30, 136, 229]) / 255
 
 # create animation frames
-for l in range(regression_start, len(post_cd_data)+4):
-    i = l  # index of the last data point to be used
-    n = 3  # number of previous fits to include
+for l in range(plot_start, len(china_data)+4):
+    current_date_index = l  # index of the last data point to be used
+    desired_fit_count = 3  # number of previous fits to include
 
-    if l > len(post_cd_data):  # used to fade out the last three plots
-        i = len(post_cd_data)
-        n = 3 - (l - i)
+    if l > len(china_data):  # used to fade out the last three plots
+        current_date_index = len(china_data)
+        desired_fit_count = 3 - (l - current_date_index)
 
-    data_x = np.arange(0, i)
-    data_y = post_cd_data[0:i]
+    china_data_x = np.arange(0, current_date_index)
+    china_data_y = china_data[0:current_date_index]
+
+    if current_date_index > row_data_start:
+        row_data_x = china_data_x[row_data_start:current_date_index]
+        row_data_y = row_data[0:current_date_index - row_data_start]
 
     # creation of pyplot plot
     fig, ax_relgrow = plt.subplots()
@@ -128,32 +139,29 @@ for l in range(regression_start, len(post_cd_data)+4):
     ax_relgrow.set_ylabel("relative growth of infections in China")
     ax_absrow.set_ylabel("total # of confirmed infections outside China")
 
-    ax_relgrow.tick_params(axis="y",colors=change_color)
-    ax_relgrow.yaxis.label.set_color(change_color)
+    ax_relgrow.tick_params(axis="y", colors=china_growth_color)
+    ax_relgrow.yaxis.label.set_color(china_growth_color)
 
-    ax_absrow.tick_params(axis="y",colors=row_color)
+    ax_absrow.tick_params(axis="y", colors=row_color)
     ax_absrow.yaxis.label.set_color(row_color)
 
-
     # plot the original data
-    ax_abschina.plot(data_x, data_y, "s", color=data_color,
+    ax_abschina.plot(china_data_x, china_data_y, "s", color=china_color,
                      markersize=7, zorder=10)
 
-    if i > row_start:
-        ax_absrow.plot(data_x[row_start: i], row_data[0:i -
-                                                      row_start], lw=4, color=row_color, zorder=10)
+    if current_date_index > row_data_start:
+        ax_absrow.plot(row_data_x, row_data_y, lw=4, color=row_color, zorder=10)
 
     # create the exponential plots
-    for k in range(np.max([i-n, regression_start]), np.min([exponential_stop, i+1])):
+    for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
-        popt, pcov = scipy.optimize.curve_fit(
-            exponential_fit_function,  data_x[0:k],  data_y[0:k])
+        popt, pcov = scipy.optimize.curve_fit(row_fit_function,  row_data_x[:current_date_index-row_data_start-k], row_data_y[:current_date_index-row_data_start-k])
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
         # create uncertainty floats for error bars, 2* means 2 sigma
-        a = ufloat(popt[0], 2*perr[0])
-        b = ufloat(popt[1], 2*perr[1])
+        a = ufloat(popt[0], perr[0])
+        b = ufloat(popt[1], perr[1])
 
         # get the values of the uncertain fit
         fit_x_unc = np.linspace(xmin, xmax, 300)
@@ -163,26 +171,24 @@ for l in range(regression_start, len(post_cd_data)+4):
         std_y = unp.std_devs(fit_y_unc)
 
         # plot
-        if k == i:
+        if k == 0:
             print("[" + str(l) + "] Exponential fit-parameters:")
             print("a = " + str(a))
             print("b = " + str(b))
 
-            ax_abschina.plot(nom_x, nom_y, color=exponential_color, linewidth=3,
-                             label="data fitted to an exponential function")
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=exponential_color,
-                                     alpha=0.3, label="area of uncertainty for the exponential fit")
-        elif k == i-1:
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=exponential_color, alpha=0.2)
-        elif k == i-2:
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=exponential_color, alpha=0.05)
+            ax_absrow.plot(nom_x, nom_y, color=row_regression_color, linewidth=3)
+            ax_absrow.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=row_regression_color, alpha=0.5)
+        elif k == 1:
+            ax_absrow.fill_between(nom_x, nom_y - std_y, nom_y +
+                                   std_y, facecolor=row_regression_color, alpha=0.2)
+        elif k == 2:
+            ax_absrow.fill_between(nom_x, nom_y - std_y, nom_y +
+                                   std_y, facecolor=row_regression_color, alpha=0.05)
 
-    for k in range(np.max([i-n, sigmoidal_start]), i+1):
+    for k in range(np.max([current_date_index-desired_fit_count, china_regression_start]), current_date_index+1):
         # fit the sigmoidal function
         popt, pcov = scipy.optimize.curve_fit(
-            sigmoidal_fit_function,  data_x[8:k],  data_y[8:k], p0=[80000, 0.4, 20])
+            china_fit_function,  china_data_x[0:k],  china_data_y[0:k], p0=[80000, 0.4, 20])
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
@@ -199,50 +205,50 @@ for l in range(regression_start, len(post_cd_data)+4):
         std_y = unp.std_devs(fit_y_unc)
 
         # plot
-        if k == i:
+        if k == current_date_index:
             print("[" + str(l) + "] Sigmoid fit-parameters:")
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            ax_abschina.plot(nom_x, nom_y, color=sigmoidal_color, linewidth=3,
+            ax_abschina.plot(nom_x, nom_y, color=china_regression_color, linewidth=3,
                              label="data fitted to an sigmoidal function")
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=sigmoidal_color,
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color,
                                      alpha=0.6, label="area of uncertainty for the sigmoidal fit")
-        elif k == i-1:
+        elif k == current_date_index-1:
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=sigmoidal_color, alpha=0.2)
-        elif k == i-2:
+                                     std_y, facecolor=china_regression_color, alpha=0.2)
+        elif k == current_date_index-2:
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=sigmoidal_color, alpha=0.1)
+                                     std_y, facecolor=china_regression_color, alpha=0.1)
 
-    ax_relgrow.plot(data_x[1:i], relative_growth_y[0:i-1],
-                    color=change_color, alpha=0.4, lw=2)
+    ax_relgrow.plot(china_data_x[1:current_date_index], china_relgrowth[0:current_date_index-1],
+                    color=china_growth_color, alpha=0.4, lw=2)
 
     # format the border of the diagram
     ax_abschina.spines['top'].set_color('white')
     ax_relgrow.spines['top'].set_color('white')
     ax_absrow.spines['top'].set_color('white')
 
-    ax_relgrow.spines['left'].set_color(change_color)
+    ax_relgrow.spines['left'].set_color(china_growth_color)
     ax_absrow.spines['left'].set_color([0, 0, 0, 0])
     ax_abschina.spines['left'].set_color([0, 0, 0, 0])
 
     ax_absrow.spines['right'].set_color(row_color)
 
     # these objects are used to create a consistent legend
-    legendel_chinadata = Line2D([0], [0], marker='s', color=data_color,
-                                lw=0, markerfacecolor=data_color, markersize=10)
+    legendel_chinadata = Line2D([0], [0], marker='s', color=china_color,
+                                lw=0, markerfacecolor=china_color, markersize=10)
     legendel_rowdata = Line2D([0], [0], color=row_color, lw=4)
     legendel_exponentialfit = Line2D(
-        [0], [0], color=exponential_color, lw=4)
+        [0], [0], color=row_regression_color, lw=4)
     legendel_sigmoidalfit = Line2D(
-        [0], [0], color=sigmoidal_color, lw=4)
+        [0], [0], color=china_regression_color, lw=4)
     legendel_exponential_areaofuncertainty = Patch(
-        facecolor=exponential_color, alpha=0.5)
+        facecolor=row_regression_color, alpha=0.5)
     legendel_sigmoidal_areaofuncertainty = Patch(
-        facecolor=sigmoidal_color, alpha=0.5)
+        facecolor=china_regression_color, alpha=0.5)
     legendel_relchange = Line2D(
-        [0], [0], color=change_color, lw=4)
+        [0], [0], color=china_growth_color, lw=4)
 
     # add the legend and object descriptions
     legend = ax_relgrow.legend([legendel_chinadata,
@@ -276,7 +282,7 @@ final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 video_name = 'video.avi'  # name of the exported video
 
 # get video size data
-frame = cv2.imread("./" + str(regression_start) + ".png")
+frame = cv2.imread("./" + str(plot_start) + ".png")
 height, width, layers = frame.shape
 
 # create video writer
@@ -284,15 +290,15 @@ fps = 4
 video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
-for i in range(0, initial_frame_repeatcount):
-    video.write(cv2.imread("./" + str(regression_start) + ".png"))
+for current_date_index in range(0, initial_frame_repeatcount):
+    video.write(cv2.imread("./" + str(plot_start) + ".png"))
 
 # animation frames
-for i in range(regression_start + 1, len(post_cd_data)+3):
-    video.write(cv2.imread("./" + str(i) + ".png"))
+for current_date_index in range(plot_start + 1, len(post_cd_data)+3):
+    video.write(cv2.imread("./" + str(current_date_index) + ".png"))
 
 # write final frame repeatedly
-for i in range(0, final_frame_repeatcount):
+for current_date_index in range(0, final_frame_repeatcount):
     video.write(cv2.imread("./" + str(len(post_cd_data)+3) + ".png"))
 
 # save video
