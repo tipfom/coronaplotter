@@ -20,13 +20,13 @@ china_data = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
               34546, 37198, 40171, 42638, 44653, 46472,
               63851, 66492, 68500, 70548, 72436, 74185,
               75003, 75891, 76288, 76936, 77150, 77658,
-              78064, 78497]
+              78064, 78497, 78824]
 
 # 25.Jan which means +9 from precd data
 row_data = [23, 29, 37, 56, 68, 82, 106, 132, 146, 153, 159,
             191, 216, 270, 288, 307, 319, 395, 441, 447, 505,
             526, 683, 794, 804, 924, 1073, 1200, 1402, 1769,
-            2069, 2459, 2918]
+            2069, 2459, 2918, 3664]
 
 china_relgrowth = []
 for current_date_index in range(len(china_data)-1):
@@ -83,7 +83,7 @@ for l in range(plot_start, len(china_data)+4):
 
     if l > len(china_data):  # used to fade out the last three plots
         current_date_index = len(china_data)
-        desired_fit_count = 3 - (l - current_date_index)
+        desired_fit_count = 3 - (l - current_date_index)+1
 
     china_data_x = np.arange(0, current_date_index)
     china_data_y = china_data[0:current_date_index]
@@ -184,7 +184,7 @@ for l in range(plot_start, len(china_data)+4):
 
         # plot
         if k == 0:
-            print("[" + str(l) + "] Exponential fit-parameters:")
+            print("[" + (startdate + timedelta(current_date_index)).strftime("%d. %b") + "] ROW fit(y=a*exp(b*x))-parameters:")
             print("a = " + str(a))
             print("b = " + str(b))
 
@@ -199,17 +199,17 @@ for l in range(plot_start, len(china_data)+4):
             ax_absrow.fill_between(nom_x, nom_y - std_y, nom_y +
                                    std_y, facecolor=row_regression_color, alpha=0.05)
 
-    for k in range(np.max([current_date_index-desired_fit_count, china_regression_start]), current_date_index+1):
+    for k in range(0, np.min([desired_fit_count, current_date_index-china_regression_start])):
         # fit the sigmoidal function
         popt, pcov = scipy.optimize.curve_fit(
-            china_fit_function,  china_data_x[0:k],  china_data_y[0:k], p0=[80000, 0.4, 20])
+            china_fit_function,  china_data_x[0:current_date_index-k],  china_data_y[0:current_date_index-k], p0=[80000, 0.4, 20])
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
         # create uncertainty floats for error bars, 2* means 2 sigma
-        a = ufloat(popt[0], 2*perr[0])
-        b = ufloat(popt[1], 2*perr[1])
-        c = ufloat(popt[2], 2*perr[2])
+        a = ufloat(popt[0], perr[0])
+        b = ufloat(popt[1], perr[1])
+        c = ufloat(popt[2], perr[2])
 
         # get the values of the uncertain fit
         fit_x_unc = np.linspace(xmin, xmax, 300)
@@ -219,19 +219,17 @@ for l in range(plot_start, len(china_data)+4):
         std_y = unp.std_devs(fit_y_unc)
 
         # plot
-        if k == current_date_index:
-            print("[" + str(l) + "] Sigmoid fit-parameters:")
+        if k == 0:
+            print("[" + (startdate + timedelta(current_date_index)).strftime("%d. %b") + "] China fit(y=a/(1+exp(-b*(x-c))))-parameters:")
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            ax_abschina.plot(nom_x, nom_y, color=china_regression_color, linewidth=3,
-                             label="data fitted to an sigmoidal function")
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color,
-                                     alpha=0.6, label="area of uncertainty for the sigmoidal fit")
-        elif k == current_date_index-1:
+            ax_abschina.plot(nom_x, nom_y, color=china_regression_color, linewidth=3)
+            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color, alpha=0.6)
+        elif k == 1:
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.2)
-        elif k == current_date_index-2:
+        elif k == 2:
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.1)
 
@@ -271,11 +269,11 @@ for l in range(plot_start, len(china_data)+4):
                                 legendel_relchange_row],
                                ["total infections in China",
                                 "infections in China fitted to an logistic function",
-                                "95% area of uncertainty for to the logistic function",
+                                "68% area of uncertainty for to the logistic function",
                                 "relative growth in China",
                                 "total infections outside China",
                                 "infections outside China fitted to an exponential function",
-                                "95% area of uncertainty for the exponential function",
+                                "68% area of uncertainty for the exponential function",
                                 "relative growth outside China"], loc='upper left')
     legend.get_frame().set_edgecolor("black")
     legend.set_zorder(20)
