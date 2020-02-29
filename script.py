@@ -20,13 +20,13 @@ china_data = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
               34546, 37198, 40171, 42638, 44653, 46472,
               63851, 66492, 68500, 70548, 72436, 74185,
               75003, 75891, 76288, 76936, 77150, 77658,
-              78064, 78497, 78824]
+              78064, 78497, 78824, 79251]
 
 # 25.Jan which means +9 from precd data
 row_data = [23, 29, 37, 56, 68, 82, 106, 132, 146, 153, 159,
             191, 216, 270, 288, 307, 319, 395, 441, 447, 505,
             526, 683, 794, 804, 924, 1073, 1200, 1402, 1769,
-            2069, 2459, 2918, 3664]
+            2069, 2459, 2918, 3664, 4691]
 
 china_relgrowth = []
 for current_date_index in range(len(china_data)-1):
@@ -63,7 +63,7 @@ row_regression_start = 11
 
 # x-axis range
 xmin = 0
-xmax = 47
+xmax = 52
 # steps between major ticks on x-axi
 xstep = 7
 
@@ -126,14 +126,14 @@ for l in range(plot_start, len(china_data)+4):
     ax_relgrow.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
     ax_relgrow.yaxis.set_minor_locator(MultipleLocator(0.1))
 
-    ax_absrow.set_yticks([0, 1000, 2000, 3000, 4000, 5000])
-    ax_absrow.set_yticklabels(["0", "1k", "2k", "3k", "4k", "5k"])
-    ax_absrow.yaxis.set_minor_locator(MultipleLocator(500))
+    ax_absrow.set_yticks([0, 2000, 4000, 6000, 8000, 1e4])
+    ax_absrow.set_yticklabels(["0", "2k", "4k", "6k", "8k", "10k"])
+    ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
 
     # setting the y-axis limit
     ax_abschina.set_ylim([0, 100000])
     ax_relgrow.set_ylim([0, 1])
-    ax_absrow.set_ylim([0, 5000])
+    ax_absrow.set_ylim([0, 10000])
 
     # label axis
     plt.xlabel("date")
