@@ -309,7 +309,7 @@ for l in range(plot_start, len(china_total_infections)+4):
 initial_frame_repeatcount = 2  # number of times the initial frame is to be repeated
 final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 
-video_name = 'video.avi'  # name of the exported video
+video_name = 'video.mp4'  # name of the exported video
 
 # get video size data
 frame = cv2.imread("./" + str(plot_start) + ".png")
