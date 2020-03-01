@@ -14,29 +14,53 @@ from uncertainties import ufloat
 # data points, cummulative
 # to add another date simply append the # of infected people
 
-china_data = [45, 62, 121, 198, 291, 440, 571, 830, 1287,
-              1975, 2744, 4515, 5974, 7711, 9692, 11791,
-              14380, 17205, 20438, 24324, 28018, 31161,
-              34546, 37198, 40171, 42638, 44653, 46472,
-              63851, 66492, 68500, 70548, 72436, 74185,
-              75003, 75891, 76288, 76936, 77150, 77658,
-              78064, 78497, 78824, 79251, 79824]
+datafile_WHO_name = "./who_covid_19_sit_rep_time_series.csv"
+datafile_deaths_name = "./time_series_19-covid-Deaths.csv"
+datafile_recovered_name = "./time_series_19-covid-Recovered.csv"
 
-# 25.Jan which means +9 from precd data
-row_data = [23, 29, 37, 56, 68, 82, 106, 132, 146, 153, 159,
-            191, 216, 270, 288, 307, 319, 395, 441, 447, 505,
-            526, 683, 794, 804, 924, 1073, 1200, 1402, 1769,
-            2069, 2459, 2918, 3664, 4691, 6009]
+china_total_infections = []
+row_total_infections = []
+row_distribution = []
+infected_recovered_dead_distribution = []
+
+with open(datafile_WHO_name) as datafile:
+    data_WHO_raw = datafile.readlines()
+data_WHO_raw = [l.split(",") for l in data_WHO_raw]
+
+with open(datafile_WHO_name) as datafile:
+    data_deaths_raw = datafile.readlines()
+data_deaths_raw = [l.split(",") for l in data_deaths_raw]
+
+with open(datafile_WHO_name) as datafile:
+    data_recovered_raw = datafile.readlines()
+data_recovered_raw = [l.split(",") for l in data_recovered_raw]
+
+for i in range(3, len(data_WHO_raw[0])):
+    row_distribution.append({"Western Pacific Region": 0, "South-East Asia Region": 0,
+                             "Region of the Americas": 0, "European Region": 0, "Eastern Mediterranean Region": 0, "Other": 0})
+
+for i in range(len(data_WHO_raw)):
+    if(i == 2):
+        for j in range(3, len(data_WHO_raw[i])):
+            china_total_infections.append(int(data_WHO_raw[i][j]))
+    elif (i == 3):
+        for j in range(3, len(data_WHO_raw[i])):
+            row_total_infections.append(int(data_WHO_raw[i][j]))
+    elif (i > 43):
+        for j in range(3, len(data_WHO_raw[i])):
+            if(data_WHO_raw[i][j] != ""):
+                row_distribution[j-3][data_WHO_raw[i][2]] += int(data_WHO_raw[i][j])
+
 
 china_relgrowth = []
-for current_date_index in range(len(china_data)-1):
+for current_date_index in range(len(china_total_infections)-1):
     china_relgrowth.append(
-        china_data[current_date_index+1]/china_data[current_date_index]-1)
+        china_total_infections[current_date_index+1]/china_total_infections[current_date_index]-1)
 
 row_relgrowth = []
-for current_date_index in range(len(row_data)-1):
+for current_date_index in range(len(row_total_infections)-1):
     row_relgrowth.append(
-        row_data[current_date_index+1]/row_data[current_date_index]-1)
+        row_total_infections[current_date_index+1]/row_total_infections[current_date_index]-1)
 
 
 # increase pyplot font size
@@ -57,7 +81,6 @@ def china_fit_function(x, a, b, c):
 
 
 plot_start = 11
-row_data_start = 9
 china_regression_start = 16  # index to start plotting the sigmoidal fit
 row_regression_start = 11
 
@@ -76,21 +99,22 @@ row_color = np.array([179, 98, 18]) / 255
 row_growth_color = np.array([255, 166, 77]) / 255
 row_regression_color = np.array([255, 152, 51]) / 255
 
+piechart_colors = 0
+
 # create animation frames
-for l in range(plot_start, len(china_data)+4):
+for l in range(plot_start, len(china_total_infections)+4):
     current_date_index = l  # index of the last data point to be used
     desired_fit_count = 3  # number of previous fits to include
 
-    if l > len(china_data):  # used to fade out the last three plots
-        current_date_index = len(china_data)
+    if l > len(china_total_infections):  # used to fade out the last three plots
+        current_date_index = len(china_total_infections)
         desired_fit_count = 3 - (l - current_date_index)+1
 
     china_data_x = np.arange(0, current_date_index)
-    china_data_y = china_data[0:current_date_index]
+    china_data_y = china_total_infections[0:current_date_index]
 
-    if current_date_index > row_data_start:
-        row_data_x = china_data_x[row_data_start:current_date_index]
-        row_data_y = row_data[0:current_date_index - row_data_start]
+    row_data_x = china_data_x[0:current_date_index]
+    row_data_y = row_total_infections[0:current_date_index]
 
     # creation of pyplot plot
     fig, ax_relgrow = plt.subplots()
@@ -105,7 +129,7 @@ for l in range(plot_start, len(china_data)+4):
 
     majxticks = ([], [])
     # generation of x-axis tick-names
-    startdate = datetime(2020, 1, 16)
+    startdate = datetime(2020, 1, 21)
     for j in range(xmin, xmax+1, xstep):
         majxticks[0].append(j)
         majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
@@ -159,15 +183,14 @@ for l in range(plot_start, len(china_data)+4):
     ax_abschina.plot(china_data_x, china_data_y, "s", color=china_color,
                      markersize=7, zorder=10)
 
-    if current_date_index > row_data_start:
-        ax_absrow.plot(row_data_x, row_data_y, "o",
-                       color=row_color, markersize=7, zorder=10)
+    ax_absrow.plot(row_data_x, row_data_y, "o",
+                   color=row_color, markersize=7, zorder=10)
 
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
-        popt, pcov = scipy.optimize.curve_fit(
-            row_fit_function,  row_data_x[:current_date_index-row_data_start-k], row_data_y[:current_date_index-row_data_start-k])
+        popt, pcov = scipy.optimize.curve_fit(row_fit_function,  row_data_x[:current_date_index-k],
+                                              row_data_y[:current_date_index-k], p0=[5, 0.2])
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
@@ -184,7 +207,8 @@ for l in range(plot_start, len(china_data)+4):
 
         # plot
         if k == 0:
-            print("[" + (startdate + timedelta(current_date_index)).strftime("%d. %b") + "] ROW fit(y=a*exp(b*x))-parameters:")
+            print("[" + (startdate + timedelta(current_date_index)
+                         ).strftime("%d. %b") + "] ROW fit(y=a*exp(b*x))-parameters:")
             print("a = " + str(a))
             print("b = " + str(b))
 
@@ -220,12 +244,15 @@ for l in range(plot_start, len(china_data)+4):
 
         # plot
         if k == 0:
-            print("[" + (startdate + timedelta(current_date_index)).strftime("%d. %b") + "] China fit(y=a/(1+exp(-b*(x-c))))-parameters:")
+            print("[" + (startdate + timedelta(current_date_index)
+                         ).strftime("%d. %b") + "] China fit(y=a/(1+exp(-b*(x-c))))-parameters:")
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            ax_abschina.plot(nom_x, nom_y, color=china_regression_color, linewidth=3)
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color, alpha=0.6)
+            ax_abschina.plot(
+                nom_x, nom_y, color=china_regression_color, linewidth=3)
+            ax_abschina.fill_between(
+                nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color, alpha=0.6)
         elif k == 1:
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.2)
@@ -236,9 +263,8 @@ for l in range(plot_start, len(china_data)+4):
     ax_relgrow.plot(china_data_x[1:current_date_index], china_relgrowth[0:current_date_index-1],
                     color=china_growth_color, alpha=0.8, lw=2)
 
-    if current_date_index > row_data_start:
-        ax_relgrow.plot(row_data_x[1:current_date_index-row_data_start], row_relgrowth[0:current_date_index-row_data_start-1],
-                        color=row_growth_color, alpha=0.8, lw=2)
+    ax_relgrow.plot(row_data_x[1:current_date_index], row_relgrowth[0:current_date_index-1],
+                    color=row_growth_color, alpha=0.8, lw=2)
 
     # these objects are used to create a consistent legend
     legendel_chinadata = Line2D([0], [0], marker="s", color=china_color,
@@ -259,27 +285,33 @@ for l in range(plot_start, len(china_data)+4):
         [0], [0], color=row_growth_color, lw=4)
 
     # add the legend and object descriptions
-    legend = ax_relgrow.legend([legendel_chinadata,
-                                legendel_china_regression,
-                                legendel_china_regression_areaofuncertainty,
-                                legendel_relchange_china,
-                                legendel_rowdata,
-                                legendel_row_regression,
-                                legendel_row_regression_areaofuncertainty,
-                                legendel_relchange_row],
-                               ["total infections in China",
-                                "infections in China fitted to an logistic function",
-                                "68% area of uncertainty for to the logistic function",
-                                "relative growth in China",
-                                "total infections outside China",
-                                "infections outside China fitted to an exponential function",
-                                "68% area of uncertainty for the exponential function",
-                                "relative growth outside China"], loc='upper left')
-    legend.get_frame().set_edgecolor("black")
-    legend.set_zorder(20)
+    # legend = ax_relgrow.legend([legendel_chinadata,
+    #                            legendel_china_regression,
+    #                            legendel_china_regression_areaofuncertainty,
+    #                            legendel_relchange_china,
+    #                            legendel_rowdata,
+    #                            legendel_row_regression,
+    #                            legendel_row_regression_areaofuncertainty,
+    #                            legendel_relchange_row],
+    #                           ["total infections in China",
+    #                            "infections in China fitted to an logistic function",
+    #                            "68% area of uncertainty for to the logistic function",
+    #                            "relative growth in China",
+    #                            "total infections outside China",
+    #                            "infections outside China fitted to an exponential function",
+    #                            "68% area of uncertainty for the exponential function",
+    #                            "relative growth outside China"], loc='upper right')
+    # legend.get_frame().set_edgecolor("black")
+    # legend.set_zorder(20)
     plt.title("see comments for further explanations")
 
     plt.tight_layout()
+
+    ax_pie = plt.axes([.1, .5, .4, .4])
+    v = row_distribution[current_date_index-1].values()
+    k = row_distribution[current_date_index-1].keys()
+    ax_pie.pie(v, labels=k)
+    ax_pie.axis("equal")
 
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
@@ -304,12 +336,12 @@ for current_date_index in range(0, initial_frame_repeatcount):
     video.write(cv2.imread("./" + str(plot_start) + ".png"))
 
 # animation frames
-for current_date_index in range(plot_start + 1, len(china_data)+3):
+for current_date_index in range(plot_start + 1, len(china_total_infections)+3):
     video.write(cv2.imread("./" + str(current_date_index) + ".png"))
 
 # write final frame repeatedly
 for current_date_index in range(0, final_frame_repeatcount):
-    video.write(cv2.imread("./" + str(len(china_data)+3) + ".png"))
+    video.write(cv2.imread("./" + str(len(china_total_infections)+3) + ".png"))
 
 # save video
 cv2.destroyAllWindows()
