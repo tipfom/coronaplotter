@@ -73,7 +73,7 @@ for i in range(4, len(data_deaths_raw[0])):
     china_total_infections.append(total_china)
     row_total_infections.append(total_row)
     infected_recovered_dead_distribution.append(
-        {"Recovered": recovered, "Dead": dead, "Infected": total_china + total_row - dead - recovered})
+        { "Recovered": recovered, "Infected": total_china + total_row - dead - recovered, "Dead": dead })
 
 
 china_relgrowth = []
@@ -110,7 +110,7 @@ row_regression_start = 11
 
 # x-axis range
 xmin = 0
-xmax = 52
+xmax = 42
 # steps between major ticks on x-axi
 xstep = 7
 
@@ -124,8 +124,8 @@ row_growth_color = np.array([255, 166, 77]) / 255
 row_regression_color = np.array([255, 152, 51]) / 255
 
 piechart_colors = [np.array([173, 255, 152]) / 255,  # recovered
-                   np.array([180, 179, 255]) / 255,  # dead
-                   np.array([179, 144, 125]) / 255]  # infected
+                   np.array([179, 144, 125]) / 255,  # infected
+                   np.array([180, 179, 255]) / 255]  # dead
 
 # create animation frames
 for l in range(plot_start, len(china_total_infections)+4):
@@ -155,7 +155,7 @@ for l in range(plot_start, len(china_total_infections)+4):
 
     majxticks = ([], [])
     # generation of x-axis tick-names
-    startdate = datetime(2020, 1, 21)
+    startdate = datetime(2020, 1, 22)
     for j in range(xmin, xmax+1, xstep):
         majxticks[0].append(j)
         majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
@@ -181,9 +181,9 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
 
     # setting the y-axis limit
-    ax_abschina.set_ylim([0, 100000])
+    ax_abschina.set_ylim([0, 120000])
     ax_relgrow.set_ylim([0, 1])
-    ax_absrow.set_ylim([0, 10000])
+    ax_absrow.set_ylim([0, 12000])
 
     # label axis
     plt.xlabel("date")
@@ -292,50 +292,12 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_relgrow.plot(row_data_x[1:current_date_index], row_relgrowth[0:current_date_index-1],
                     color=row_growth_color, alpha=0.8, lw=2)
 
-    # these objects are used to create a consistent legend
-    legendel_chinadata = Line2D([0], [0], marker="s", color=china_color,
-                                lw=0, markerfacecolor=china_color, markersize=10)
-    legendel_rowdata = Line2D([0], [0], marker="o", color=row_color,
-                              lw=0, markerfacecolor=row_color, markersize=10)
-    legendel_row_regression = Line2D(
-        [0], [0], color=row_regression_color, lw=4)
-    legendel_china_regression = Line2D(
-        [0], [0], color=china_regression_color, lw=4)
-    legendel_row_regression_areaofuncertainty = Patch(
-        facecolor=row_regression_color, alpha=0.5)
-    legendel_china_regression_areaofuncertainty = Patch(
-        facecolor=china_regression_color, alpha=0.5)
-    legendel_relchange_china = Line2D(
-        [0], [0], color=china_growth_color, lw=4)
-    legendel_relchange_row = Line2D(
-        [0], [0], color=row_growth_color, lw=4)
-
-    # add the legend and object descriptions
-    # legend = ax_relgrow.legend([legendel_chinadata,
-    #                            legendel_china_regression,
-    #                            legendel_china_regression_areaofuncertainty,
-    #                            legendel_relchange_china,
-    #                            legendel_rowdata,
-    #                            legendel_row_regression,
-    #                            legendel_row_regression_areaofuncertainty,
-    #                            legendel_relchange_row],
-    #                           ["total infections in China",
-    #                            "infections in China fitted to an logistic function",
-    #                            "68% area of uncertainty for to the logistic function",
-    #                            "relative growth in China",
-    #                            "total infections outside China",
-    #                            "infections outside China fitted to an exponential function",
-    #                            "68% area of uncertainty for the exponential function",
-    #                            "relative growth outside China"], loc='upper right')
-    # legend.get_frame().set_edgecolor("black")
-    # legend.set_zorder(20)
     plt.title("see comments for further explanations")
-
     plt.tight_layout()
 
-    ax_pie = plt.axes([.1, .5, .4, .4])
-    ax_pie.pie(infected_recovered_dead_distribution[current_date_index].values(),
-               labels=["Recovered", "Dead", "Infected"],
+    ax_pie = plt.axes([.25, .55, .35, .35])
+    ax_pie.pie(infected_recovered_dead_distribution[current_date_index-1].values(),
+               labels=["Recovered", "Infected", "Dead"],
                colors=piechart_colors, explode=[0.05, 0, 0], startangle=90, shadow=True)
     ax_pie.axis("equal")
 
