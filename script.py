@@ -169,16 +169,16 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_abschina.tick_params(axis="x", which="minor", length=5, width=1)
 
     # setting the y-axis ticks
-    ax_abschina.set_yticks([0, 20000, 40000, 60000, 80000, 100000])
-    ax_abschina.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k"])
+    ax_abschina.set_yticks([0, 2e4, 4e4, 6e4, 8e4, 10e4, 12e4])
+    ax_abschina.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k", "120k"])
     ax_abschina.yaxis.set_minor_locator(MultipleLocator(10000))
 
     ax_relgrow.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax_relgrow.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
     ax_relgrow.yaxis.set_minor_locator(MultipleLocator(0.1))
 
-    ax_absrow.set_yticks([0, 2000, 4000, 6000, 8000, 1e4])
-    ax_absrow.set_yticklabels(["0", "2k", "4k", "6k", "8k", "10k"])
+    ax_absrow.set_yticks([0, 2000, 4000, 6000, 8000, 1e4, 1.2e4])
+    ax_absrow.set_yticklabels(["0", "2k", "4k", "6k", "8k", "10k", "12k"])
     ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
 
     # setting the y-axis limit
@@ -293,15 +293,15 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_relgrow.plot(row_data_x[1:current_date_index], row_relgrowth[0:current_date_index-1],
                     color=row_growth_color, alpha=0.8, lw=2)
 
-    plt.title("see comments for further explanations")
+    plt.title("see comments for further explanations", y=-0.08)
     plt.tight_layout()
 
-    ax_pie = plt.axes([.25, .55, .35, .35])
+    ax_pie = plt.axes([.2, .55, .35, .35])
     ax_pie.pie(infected_recovered_dead_distribution[current_date_index-1].values(),
                labels=["Recovered", "Infected", "Dead"],
                colors=piechart_colors, startangle=90, radius=500, shadow=True)
     ax_pie.axis("equal")
-
+    plt.title("global breakdown\nof infection states\n")
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
     plt.close()
