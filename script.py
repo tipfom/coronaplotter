@@ -14,9 +14,10 @@ from uncertainties import ufloat
 # data points, cummulative
 # to add another date simply append the # of infected people
 
-datafile_confirmed_name = "./time_series_19-covid-Confirmed.csv"
-datafile_deaths_name = "./time_series_19-covid-Deaths.csv"
-datafile_recovered_name = "./time_series_19-covid-Recovered.csv"
+jhu_submodule_path = "./JHU-data/csse_covid_19_data/csse_covid_19_time_series/"
+datafile_confirmed_name = jhu_submodule_path + "time_series_19-covid-Confirmed.csv"
+datafile_deaths_name = jhu_submodule_path + "time_series_19-covid-Deaths.csv"
+datafile_recovered_name = jhu_submodule_path + "time_series_19-covid-Recovered.csv"
 
 china_total_infections = []
 row_total_infections = []

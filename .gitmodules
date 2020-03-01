@@ -1,0 +1,3 @@
+[submodule "JHU-data"]
+	path = JHU-data
+	url = https://github.com/CSSEGISandData/COVID-19.git
