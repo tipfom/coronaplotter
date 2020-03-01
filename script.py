@@ -298,7 +298,7 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_pie = plt.axes([.25, .55, .35, .35])
     ax_pie.pie(infected_recovered_dead_distribution[current_date_index-1].values(),
                labels=["Recovered", "Infected", "Dead"],
-               colors=piechart_colors, explode=[0.05, 0, 0], startangle=90, shadow=True)
+               colors=piechart_colors, startangle=90, radius=500, shadow=True)
     ax_pie.axis("equal")
 
     # save the plot in the current folder
