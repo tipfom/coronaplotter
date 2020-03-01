@@ -25,21 +25,23 @@ infected_recovered_dead_distribution = []
 
 with open(datafile_confirmed_name) as datafile:
     data_confirmed_raw = datafile.readlines()
-data_confirmed_raw = [l.replace("\",","-").split(",") for l in data_confirmed_raw]
+data_confirmed_raw = [l.replace("\",", "-").split(",")
+                      for l in data_confirmed_raw]
 
 with open(datafile_deaths_name) as datafile:
     data_deaths_raw = datafile.readlines()
-data_deaths_raw = [l.replace("\",","-").split(",") for l in data_deaths_raw]
+data_deaths_raw = [l.replace("\",", "-").split(",") for l in data_deaths_raw]
 
 with open(datafile_recovered_name) as datafile:
     data_recovered_raw = datafile.readlines()
-data_recovered_raw = [l.replace("\",","-").split(",") for l in data_recovered_raw]
+data_recovered_raw = [l.replace("\",", "-").split(",")
+                      for l in data_recovered_raw]
 
-#for i in range(3, len(data_WHO_raw[0])):
+# for i in range(3, len(data_WHO_raw[0])):
 #    row_distribution.append({"Western Pacific Region": 0, "South-East Asia Region": 0,
 #                             "Region of the Americas": 0, "European Region": 0, "Eastern Mediterranean Region": 0, "Other": 0})
 
-#for i in range(len(data_confirmed_raw)):
+# for i in range(len(data_confirmed_raw)):
 #    if(i == 2):
 #        for j in range(3, len(data_WHO_raw[i])):
 #            china_total_infections.append(int(data_WHO_raw[i][j]))
@@ -56,22 +58,22 @@ for i in range(4, len(data_deaths_raw[0])):
     dead = 0
     total_china = 0
     total_row = 0
-    for j in range (1, len(data_deaths_raw)):
+    for j in range(1, len(data_deaths_raw)):
         if(data_confirmed_raw[j][i] != ""):
             if(data_confirmed_raw[j][1] == "Mainland China"):
                 total_china += int(data_confirmed_raw[j][i])
             else:
                 total_row += int(data_confirmed_raw[j][i])
 
-
         if(data_deaths_raw[j][i] != ""):
             dead += int(data_deaths_raw[j][i])
         if(data_recovered_raw[j][i] != ""):
             recovered += int(data_recovered_raw[j][i])
-        
+
     china_total_infections.append(total_china)
     row_total_infections.append(total_row)
-    infected_recovered_dead_distribution.append({"Recovered":recovered, "Dead":dead, "Infected":total_china + total_row - dead - recovered})
+    infected_recovered_dead_distribution.append(
+        {"Recovered": recovered, "Dead": dead, "Infected": total_china + total_row - dead - recovered})
 
 
 china_relgrowth = []
@@ -121,7 +123,9 @@ row_color = np.array([179, 98, 18]) / 255
 row_growth_color = np.array([255, 166, 77]) / 255
 row_regression_color = np.array([255, 152, 51]) / 255
 
-piechart_colors = 0
+piechart_colors = [np.array([173, 255, 152]) / 255,  # recovered
+                   np.array([180, 179, 255]) / 255,  # dead
+                   np.array([179, 144, 125]) / 255]  # infected
 
 # create animation frames
 for l in range(plot_start, len(china_total_infections)+4):
@@ -330,9 +334,9 @@ for l in range(plot_start, len(china_total_infections)+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.1, .5, .4, .4])
-    v = infected_recovered_dead_distribution[current_date_index-1].values()
-    k = infected_recovered_dead_distribution[current_date_index-1].keys()
-    ax_pie.pie(v, labels=k)
+    ax_pie.pie(infected_recovered_dead_distribution[current_date_index].values(),
+               labels=["Recovered", "Dead", "Infected"],
+               colors=piechart_colors, explode=[0.05, 0, 0], startangle=90, shadow=True)
     ax_pie.axis("equal")
 
     # save the plot in the current folder
