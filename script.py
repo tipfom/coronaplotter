@@ -77,17 +77,6 @@ for i in range(4, len(data_deaths_raw[0])):
         { "Recovered": recovered, "Infected": total_china + total_row - dead - recovered, "Dead": dead })
 
 
-china_relgrowth = []
-for current_date_index in range(len(china_total_infections)-1):
-    china_relgrowth.append(
-        china_total_infections[current_date_index+1]/china_total_infections[current_date_index]-1)
-
-row_relgrowth = []
-for current_date_index in range(len(row_total_infections)-1):
-    row_relgrowth.append(
-        row_total_infections[current_date_index+1]/row_total_infections[current_date_index]-1)
-
-
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
 matplotlib.rc('font', **font)
@@ -144,11 +133,8 @@ for l in range(plot_start, len(china_total_infections)+4):
     row_data_y = row_total_infections[0:current_date_index]
 
     # creation of pyplot plot
-    fig, ax_relgrow = plt.subplots()
-    ax_abschina = ax_relgrow.twinx()
-    ax_absrow = ax_relgrow.twinx()
-
-    ax_absrow.spines["right"].set_position(("axes", 1.15))
+    fig, ax_abschina = plt.subplots()
+    ax_absrow = ax_abschina.twinx()
 
     # setting the dimensions (basically resolution with 12by9 aspect ratio)
     fig.set_figheight(10)
@@ -173,31 +159,26 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_abschina.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k", "120k"])
     ax_abschina.yaxis.set_minor_locator(MultipleLocator(10000))
 
-    ax_relgrow.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-    ax_relgrow.set_yticklabels(["0%", "20%", "40%", "60%", "80%", "100%"])
-    ax_relgrow.yaxis.set_minor_locator(MultipleLocator(0.1))
-
     ax_absrow.set_yticks([0, 2000, 4000, 6000, 8000, 1e4, 1.2e4])
     ax_absrow.set_yticklabels(["0", "2k", "4k", "6k", "8k", "10k", "12k"])
     ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
 
     # setting the y-axis limit
-    ax_abschina.set_ylim([0, 120000])
-    ax_relgrow.set_ylim([0, 1])
-    ax_absrow.set_ylim([0, 12000])
+    ax_abschina.set_ylim([0, 100000])
+    ax_absrow.set_ylim([0, 10000])
 
     # label axis
     plt.xlabel("date")
     ax_abschina.set_ylabel("total # of confirmed infections in Mainland China")
-    ax_relgrow.set_ylabel("relative growth of infections")
     ax_absrow.set_ylabel("total # of confirmed infections outside China")
 
     # format the border of the diagram
     ax_abschina.spines['top'].set_color('white')
-    ax_relgrow.spines['top'].set_color('white')
     ax_absrow.spines['top'].set_color('white')
 
-    ax_abschina.spines['right'].set_color(china_color)
+    ax_abschina.spines['left'].set_color(china_color)
+
+    ax_absrow.spines['left'].set_color("none")
     ax_absrow.spines['right'].set_color(row_color)
 
     ax_abschina.tick_params(axis="y", colors=china_color)
@@ -287,16 +268,10 @@ for l in range(plot_start, len(china_total_infections)+4):
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.1)
 
-    ax_relgrow.plot(china_data_x[1:current_date_index], china_relgrowth[0:current_date_index-1],
-                    color=china_growth_color, alpha=0.8, lw=2)
-
-    ax_relgrow.plot(row_data_x[1:current_date_index], row_relgrowth[0:current_date_index-1],
-                    color=row_growth_color, alpha=0.8, lw=2)
-
-    plt.title("see comments for further explanations", y=-0.08)
+    plt.title("see comments for further explanations")
     plt.tight_layout()
 
-    ax_pie = plt.axes([.2, .55, .35, .35])
+    ax_pie = plt.axes([.1, .50, .35, .35])
     ax_pie.pie(infected_recovered_dead_distribution[current_date_index-1].values(),
                labels=["Recovered", "Infected", "Dead"],
                colors=piechart_colors, startangle=90, radius=500, shadow=True)
