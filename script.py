@@ -14,7 +14,7 @@ from uncertainties import ufloat
 # data points, cummulative
 # to add another date simply append the # of infected people
 
-datafile_WHO_name = "./who_covid_19_sit_rep_time_series.csv"
+datafile_confirmed_name = "./time_series_19-covid-Confirmed.csv"
 datafile_deaths_name = "./time_series_19-covid-Deaths.csv"
 datafile_recovered_name = "./time_series_19-covid-Recovered.csv"
 
@@ -23,33 +23,55 @@ row_total_infections = []
 row_distribution = []
 infected_recovered_dead_distribution = []
 
-with open(datafile_WHO_name) as datafile:
-    data_WHO_raw = datafile.readlines()
-data_WHO_raw = [l.split(",") for l in data_WHO_raw]
+with open(datafile_confirmed_name) as datafile:
+    data_confirmed_raw = datafile.readlines()
+data_confirmed_raw = [l.replace("\",","-").split(",") for l in data_confirmed_raw]
 
-with open(datafile_WHO_name) as datafile:
+with open(datafile_deaths_name) as datafile:
     data_deaths_raw = datafile.readlines()
-data_deaths_raw = [l.split(",") for l in data_deaths_raw]
+data_deaths_raw = [l.replace("\",","-").split(",") for l in data_deaths_raw]
 
-with open(datafile_WHO_name) as datafile:
+with open(datafile_recovered_name) as datafile:
     data_recovered_raw = datafile.readlines()
-data_recovered_raw = [l.split(",") for l in data_recovered_raw]
+data_recovered_raw = [l.replace("\",","-").split(",") for l in data_recovered_raw]
 
-for i in range(3, len(data_WHO_raw[0])):
-    row_distribution.append({"Western Pacific Region": 0, "South-East Asia Region": 0,
-                             "Region of the Americas": 0, "European Region": 0, "Eastern Mediterranean Region": 0, "Other": 0})
+#for i in range(3, len(data_WHO_raw[0])):
+#    row_distribution.append({"Western Pacific Region": 0, "South-East Asia Region": 0,
+#                             "Region of the Americas": 0, "European Region": 0, "Eastern Mediterranean Region": 0, "Other": 0})
 
-for i in range(len(data_WHO_raw)):
-    if(i == 2):
-        for j in range(3, len(data_WHO_raw[i])):
-            china_total_infections.append(int(data_WHO_raw[i][j]))
-    elif (i == 3):
-        for j in range(3, len(data_WHO_raw[i])):
-            row_total_infections.append(int(data_WHO_raw[i][j]))
-    elif (i > 43):
-        for j in range(3, len(data_WHO_raw[i])):
-            if(data_WHO_raw[i][j] != ""):
-                row_distribution[j-3][data_WHO_raw[i][2]] += int(data_WHO_raw[i][j])
+#for i in range(len(data_confirmed_raw)):
+#    if(i == 2):
+#        for j in range(3, len(data_WHO_raw[i])):
+#            china_total_infections.append(int(data_WHO_raw[i][j]))
+#    elif (i == 3):
+#        for j in range(3, len(data_WHO_raw[i])):
+#            row_total_infections.append(int(data_WHO_raw[i][j]))
+#    elif (i > 43):
+#        for j in range(3, len(data_WHO_raw[i])):
+#            if(data_WHO_raw[i][j] != ""):
+#                row_distribution[j-3][data_WHO_raw[i][2]] += int(data_WHO_raw[i][j])
+
+for i in range(4, len(data_deaths_raw[0])):
+    recovered = 0
+    dead = 0
+    total_china = 0
+    total_row = 0
+    for j in range (1, len(data_deaths_raw)):
+        if(data_confirmed_raw[j][i] != ""):
+            if(data_confirmed_raw[j][1] == "Mainland China"):
+                total_china += int(data_confirmed_raw[j][i])
+            else:
+                total_row += int(data_confirmed_raw[j][i])
+
+
+        if(data_deaths_raw[j][i] != ""):
+            dead += int(data_deaths_raw[j][i])
+        if(data_recovered_raw[j][i] != ""):
+            recovered += int(data_recovered_raw[j][i])
+        
+    china_total_infections.append(total_china)
+    row_total_infections.append(total_row)
+    infected_recovered_dead_distribution.append({"Recovered":recovered, "Dead":dead, "Infected":total_china + total_row - dead - recovered})
 
 
 china_relgrowth = []
@@ -308,8 +330,8 @@ for l in range(plot_start, len(china_total_infections)+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.1, .5, .4, .4])
-    v = row_distribution[current_date_index-1].values()
-    k = row_distribution[current_date_index-1].keys()
+    v = infected_recovered_dead_distribution[current_date_index-1].values()
+    k = infected_recovered_dead_distribution[current_date_index-1].keys()
     ax_pie.pie(v, labels=k)
     ax_pie.axis("equal")
 
