@@ -201,7 +201,7 @@ row_color = "#596468"  # np.array([179, 98, 18]) / 255
 row_regression_color = "#848f94"  # np.array([255, 152, 51]) / 255
 
 piechart_colors = ["#3fb68e",  # recovered
-                   "#ef8d5d",  # infected
+                   "#f5b04d",  # infected
                    "#9ea8ad",  # dead
                    "#0e8c62",
                    "#da5a1b",
