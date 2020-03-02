@@ -4,6 +4,7 @@ import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 import scipy.optimize
 import uncertainties.unumpy as unp
 from matplotlib.lines import Line2D
@@ -15,28 +16,118 @@ from uncertainties import ufloat
 # to add another date simply append the # of infected people
 
 jhu_submodule_path = "./JHU-data/csse_covid_19_data/csse_covid_19_time_series/"
-datafile_confirmed_name = jhu_submodule_path + "time_series_19-covid-Confirmed.csv"
+datafile_confirmed_name = jhu_submodule_path + \
+    "time_series_19-covid-Confirmed.csv"
 datafile_deaths_name = jhu_submodule_path + "time_series_19-covid-Deaths.csv"
-datafile_recovered_name = jhu_submodule_path + "time_series_19-covid-Recovered.csv"
+datafile_recovered_name = jhu_submodule_path + \
+    "time_series_19-covid-Recovered.csv"
 
 china_total_infections = []
 row_total_infections = []
-row_distribution = []
+infected_by_region_distribution = []
 infected_recovered_dead_distribution = []
 
+MAINLAND_CHINA = 0
+WESTERN_PACIFIC_REGION = 1
+EUROPEAN_REGION = 2
+SOUTH_EAST_ASIA_REGION = 3
+EASTERN_MEDITERRANEAN_REGION = 4
+REGION_OF_THE_AMERICANS = 5
+AFRICAN_REGION = 6
+OTHER = 7
+
+region_map = {
+    "Mainland China": MAINLAND_CHINA,
+    "Hong Kong": MAINLAND_CHINA,
+    "Macau": MAINLAND_CHINA,
+    "Taiwan": MAINLAND_CHINA,
+
+    "South Korea": WESTERN_PACIFIC_REGION,
+    "Japan": WESTERN_PACIFIC_REGION,
+    "Singapore": WESTERN_PACIFIC_REGION,
+    "Australia": WESTERN_PACIFIC_REGION,
+    "Malaysia": WESTERN_PACIFIC_REGION,
+    "Vietnam": WESTERN_PACIFIC_REGION,
+    "Philippines": WESTERN_PACIFIC_REGION,
+    "Cambodia": WESTERN_PACIFIC_REGION,
+    "New Zealand": WESTERN_PACIFIC_REGION,
+
+    "Italy": EUROPEAN_REGION,
+    "France": EUROPEAN_REGION,
+    "Germany": EUROPEAN_REGION,
+    "Spain": EUROPEAN_REGION,
+    "UK": EUROPEAN_REGION,
+    "Switzerland": EUROPEAN_REGION,
+    "Norway": EUROPEAN_REGION,
+    "Sweden": EUROPEAN_REGION,
+    "Austria": EUROPEAN_REGION,
+    "Croatia": EUROPEAN_REGION,
+    "Israel": EUROPEAN_REGION,
+    "Netherlands": EUROPEAN_REGION,
+    "Azerbaijan": EUROPEAN_REGION,
+    "Denmark": EUROPEAN_REGION,
+    "Georgia": EUROPEAN_REGION,
+    "Greece": EUROPEAN_REGION,
+    "Romania": EUROPEAN_REGION,
+    "Finland": EUROPEAN_REGION,
+    "Russia": EUROPEAN_REGION,
+    "Belarus": EUROPEAN_REGION,
+    "Belgium": EUROPEAN_REGION,
+    "Estonia": EUROPEAN_REGION,
+    "Ireland": EUROPEAN_REGION,
+    "Lithuania": EUROPEAN_REGION,
+    "Monaco": EUROPEAN_REGION,
+    "North Macedonia": EUROPEAN_REGION,
+    "San Marino": EUROPEAN_REGION,
+    "Luxembourg": EUROPEAN_REGION,
+    "Iceland": EUROPEAN_REGION,
+
+    "Thailand": SOUTH_EAST_ASIA_REGION,
+    "India": SOUTH_EAST_ASIA_REGION,
+    "Nepal": SOUTH_EAST_ASIA_REGION,
+    "Sri Lanka": SOUTH_EAST_ASIA_REGION,
+
+    "Iran": EASTERN_MEDITERRANEAN_REGION,
+    "Kuwait": EASTERN_MEDITERRANEAN_REGION,
+    "Bahrain": EASTERN_MEDITERRANEAN_REGION,
+    "United Arab Emirates": EASTERN_MEDITERRANEAN_REGION,
+    "Iraq": EASTERN_MEDITERRANEAN_REGION,
+    "Oman": EASTERN_MEDITERRANEAN_REGION,
+    "Pakistan": EASTERN_MEDITERRANEAN_REGION,
+    "Lebanon": EASTERN_MEDITERRANEAN_REGION,
+    "Afghanistan": EASTERN_MEDITERRANEAN_REGION,
+    "Egypt": EASTERN_MEDITERRANEAN_REGION,
+    "Qatar": EASTERN_MEDITERRANEAN_REGION,
+
+    "US": REGION_OF_THE_AMERICANS,
+    "Canada": REGION_OF_THE_AMERICANS,
+    "Brazil": REGION_OF_THE_AMERICANS,
+    "Mexico": REGION_OF_THE_AMERICANS,
+    "Ecuadoe": REGION_OF_THE_AMERICANS,
+
+    "Algeria": AFRICAN_REGION,
+    "Nigeria": AFRICAN_REGION,
+
+    "Others": OTHER,
+}
+
+data_confirmed_raw = []
 with open(datafile_confirmed_name) as datafile:
-    data_confirmed_raw = datafile.readlines()
-data_confirmed_raw = [l.replace("\",", "-").split(",")
-                      for l in data_confirmed_raw]
+    datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
+    for row in datafile_reader:
+        data_confirmed_raw.append(row)
 
+data_deaths_raw = []
 with open(datafile_deaths_name) as datafile:
-    data_deaths_raw = datafile.readlines()
-data_deaths_raw = [l.replace("\",", "-").split(",") for l in data_deaths_raw]
+    datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
+    for row in datafile_reader:
+        data_deaths_raw.append(row)
 
+data_recovered_raw = []
 with open(datafile_recovered_name) as datafile:
-    data_recovered_raw = datafile.readlines()
-data_recovered_raw = [l.replace("\",", "-").split(",")
-                      for l in data_recovered_raw]
+    datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
+    for row in datafile_reader:
+        data_recovered_raw.append(row)
 
 # for i in range(3, len(data_WHO_raw[0])):
 #    row_distribution.append({"Western Pacific Region": 0, "South-East Asia Region": 0,
@@ -55,27 +146,33 @@ data_recovered_raw = [l.replace("\",", "-").split(",")
 #                row_distribution[j-3][data_WHO_raw[i][2]] += int(data_WHO_raw[i][j])
 
 for i in range(4, len(data_deaths_raw[0])):
-    recovered = 0
-    dead = 0
-    total_china = 0
-    total_row = 0
+    recovered_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    dead_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    confirmed_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+
     for j in range(1, len(data_deaths_raw)):
-        if(data_confirmed_raw[j][i] != ""):
-            if(data_confirmed_raw[j][1] == "Mainland China"):
-                total_china += int(data_confirmed_raw[j][i])
-            else:
-                total_row += int(data_confirmed_raw[j][i])
+        country = data_confirmed_raw[j][1]
+        if region_map.__contains__(country):
+            region = region_map[country]
 
-        if(data_deaths_raw[j][i] != ""):
-            dead += int(data_deaths_raw[j][i])
-        if(data_recovered_raw[j][i] != ""):
-            recovered += int(data_recovered_raw[j][i])
+            if(data_confirmed_raw[j][i] != ""):
+                confirmed_by_region[region] += int(data_confirmed_raw[j][i])
+            if(data_deaths_raw[j][i] != ""):
+                dead_by_region[region] += int(data_deaths_raw[j][i])
+            if(data_recovered_raw[j][i] != ""):
+                recovered_by_region[region] += int(data_recovered_raw[j][i])
+        else:
+            print("could not find region for " + country)
 
-    china_total_infections.append(total_china)
-    row_total_infections.append(total_row)
+    total_confirmed = np.sum(confirmed_by_region)
+    total_recovered = np.sum(recovered_by_region)
+    total_dead = np.sum(dead_by_region)
+
+    china_total_infections.append(confirmed_by_region[MAINLAND_CHINA])
+    row_total_infections.append(total_confirmed - confirmed_by_region[MAINLAND_CHINA])
     infected_recovered_dead_distribution.append(
-        { "Recovered": recovered, "Infected": total_china + total_row - dead - recovered, "Dead": dead })
-
+        {"Recovered": total_recovered, "Infected": total_confirmed - total_dead - total_recovered, "Dead": total_dead})
+    infected_by_region_distribution.append(confirmed_by_region - dead_by_region - recovered_by_region)
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -156,7 +253,8 @@ for l in range(plot_start, len(china_total_infections)+4):
 
     # setting the y-axis ticks
     ax_abschina.set_yticks([0, 2e4, 4e4, 6e4, 8e4, 10e4, 12e4])
-    ax_abschina.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k", "120k"])
+    ax_abschina.set_yticklabels(
+        ["0", "20k", "40k", "60k", "80k", "100k", "120k"])
     ax_abschina.yaxis.set_minor_locator(MultipleLocator(10000))
 
     ax_absrow.set_yticks([0, 2000, 4000, 6000, 8000, 1e4, 1.2e4])
