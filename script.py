@@ -83,7 +83,7 @@ region_map = {
     "Nepal": SOUTH_EAST_ASIA_REGION,
     "Sri Lanka": SOUTH_EAST_ASIA_REGION,
 
-    "Armenia": EASTERN_MEDITERRANEAN_REGION, # ????????????
+    "Armenia": EASTERN_MEDITERRANEAN_REGION,  # ????????????
     "Iran": EASTERN_MEDITERRANEAN_REGION,
     "Kuwait": EASTERN_MEDITERRANEAN_REGION,
     "Bahrain": EASTERN_MEDITERRANEAN_REGION,
@@ -101,7 +101,7 @@ region_map = {
     "Brazil": REGION_OF_THE_AMERICANS,
     "Mexico": REGION_OF_THE_AMERICANS,
     "Ecuador": REGION_OF_THE_AMERICANS,
-    "Dominican Republic": REGION_OF_THE_AMERICANS, # ????????????
+    "Dominican Republic": REGION_OF_THE_AMERICANS,  # ????????????
 
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
@@ -188,6 +188,8 @@ matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
 
 # function definition for the exponential fit with parameters a, b
+
+
 def row_fit_function(x, a, b):
     return a*np.exp(b*x)  # exponential
 
@@ -222,8 +224,8 @@ piechart_colors = ["#66c2a3",  # recovered
                    "#848f94"]
 
 barchart_colors = [
-    "#000000",  # MAINLAND_CHINA = 0
-    "#5899DA",  # WESTERN_PACIFIC_REGION = 1
+    china_color,  # MAINLAND_CHINA = 0
+    "#BF399E",  # WESTERN_PACIFIC_REGION = 1
     "#E8743B",  # EUROPEAN_REGION = 2
     "#19A979",  # SOUTH_EAST_ASIA_REGION = 3
     "#ED4A7B",  # EASTERN_MEDITERRANEAN_REGION = 4
@@ -307,17 +309,17 @@ for l in range(plot_start, entries+4):
     # plot the original data
     ax_abschina.plot(china_data_x, china_data_y, "s", color=china_color,
                      markersize=7, zorder=10)
+    ax_abschina.fill_between(china_data_x,
+                             np.zeros(current_date_index),
+                             recovered_by_region[MAINLAND_CHINA][:current_date_index],
+                             color="#a1dbb1", ec=china_color, alpha=0.5)
 
     ax_absrow.plot(row_data_x, row_data_y, "o",
                    color=row_color, markersize=7, zorder=10)
-
-    last_bottom = np.zeros(current_date_index)
-    for i in range(1, OTHER+1):
-        reg_data = confirmed_by_region[i][0:current_date_index]
-        ax_absrow.bar(row_data_x, reg_data, width=0.3,
-                      color=barchart_colors[i], bottom=last_bottom)
-        last_bottom += reg_data
-
+    ax_absrow.fill_between(row_data_x, np.zeros(current_date_index),
+                           total_recovered[:current_date_index] -
+                           recovered_by_region[MAINLAND_CHINA][:current_date_index],
+                           color="#3fa45b", alpha=0.5)
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
@@ -396,7 +398,7 @@ for l in range(plot_start, entries+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.1, .58, .35, .35])
-    entry_index=current_date_index-1
+    entry_index = current_date_index-1
     china_total_recovered = recovered_by_region[MAINLAND_CHINA][entry_index]
     row_total_recovered = total_recovered[entry_index] - \
         china_total_recovered
@@ -412,13 +414,16 @@ for l in range(plot_start, entries+4):
     row_total_dead = total_dead[entry_index] - \
         china_total_dead
 
-    ax_pie.pie([china_total_recovered, row_total_recovered,
-                china_total_infected, row_total_infected,
-                china_total_dead, row_total_dead],
-               labels=["Recovered", "", "Infected", "", "Dead", ""],
-               colors=piechart_colors, startangle=90, radius=500)
+    piechart_data = [0]
+    for i in range(1, OTHER+1):
+        reg_data = confirmed_by_region[i][current_date_index-1]
+        piechart_data.append(reg_data)
+
+    ax_pie.pie(piechart_data, colors=barchart_colors,
+               startangle=90, radius=500)
     ax_pie.axis("equal")
     # these objects are used to create a consistent legend
+    legendel_china = Patch(facecolor=barchart_colors[0])
     legendel_westerpacificregion = Patch(facecolor=barchart_colors[1])
     legendel_europeanregion = Patch(facecolor=barchart_colors[2])
     legendel_southeastasiaregion = Patch(
@@ -431,14 +436,16 @@ for l in range(plot_start, entries+4):
     legendel_other = Patch(facecolor=barchart_colors[7])
 
     # add the legend and object descriptions
-    legend = ax_abschina.legend([legendel_westerpacificregion,
+    legend = ax_abschina.legend([legendel_china,
+                                 legendel_westerpacificregion,
                                  legendel_europeanregion,
                                  legendel_southeastasiaregion,
                                  legendel_easternmediterraneanregion,
                                  legendel_regionoftheamericans,
                                  legendel_africanregion,
                                  legendel_other],
-                                ["Western Pacific Region",
+                                ["Mainland China",
+                                 "Western Pacific Region",
                                  "European Region",
                                  "South-East Asia Region",
                                  "Eastern Mediterranean Region",
