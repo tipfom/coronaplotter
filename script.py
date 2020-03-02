@@ -407,6 +407,8 @@ for l in range(plot_start, entries+4):
 
     ax_pie.pie(piechart_data, colors=barchart_colors, startangle=90)
     ax_pie.axis("equal")
+    ax_pie.text(-0.8, 1.1, "infections sorted by region")
+
     # these objects are used to create a consistent legend
     legendel_china = Patch(facecolor=barchart_colors[0])
     legendel_westerpacificregion = Patch(facecolor=barchart_colors[1])
@@ -443,23 +445,23 @@ for l in range(plot_start, entries+4):
         [0], [0], color=china_regression_color, lw=4)
     legendel_china_recovered = Patch(
         facecolor=china_recovered_color, alpha=0.5)
-    legendel_spacer= Patch(facecolor="none")
+    legendel_spacer = Patch(facecolor="none")
     legendel_row_regression = Line2D(
         [0], [0], color=row_regression_color, lw=4)
     legendel_row_recovered = Patch(
         facecolor=row_recovered_color, alpha=0.5)
 
     total_legend = ax_abschina.legend([legendel_china_regression,
-                                     legendel_china_recovered,
-                                     legendel_spacer,
-                                     legendel_row_regression,
-                                     legendel_row_recovered],
-                                    ["Infections in China\nfitted to an logistic function",
-                                     "Recovered cases in China",
-                                     "",
-                                     "Infections outside China\nfitted to an exponential function",
-                                     "Recovered cases outside China"],
-                                    loc='upper right')
+                                       legendel_china_recovered,
+                                       legendel_spacer,
+                                       legendel_row_regression,
+                                       legendel_row_recovered],
+                                      ["Infections in China\nfitted to an logistic function",
+                                       "Recovered cases in China",
+                                       "",
+                                       "Infections outside China\nfitted to an exponential function",
+                                       "Recovered cases outside China"],
+                                      loc='upper right')
     total_legend.get_frame().set_edgecolor("black")
     total_legend.set_zorder(20)
 
