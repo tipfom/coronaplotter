@@ -212,9 +212,11 @@ xstep = 7
 # colors
 china_color = "#1866b4"  # np.array([18, 141, 179]) / 255
 china_regression_color = "#5899DA"  # np.array([56, 209, 255]) / 255
+china_recovered_color = "#a1dbb1"
 
 row_color = "#596468"  # np.array([179, 98, 18]) / 255
 row_regression_color = "#848f94"  # np.array([255, 152, 51]) / 255
+row_recovered_color = "#3fa45b"
 
 piechart_colors = ["#66c2a3",  # recovered
                    "#19A979",
@@ -283,8 +285,8 @@ for l in range(plot_start, entries+4):
     ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
 
     # setting the y-axis limit
-    ax_abschina.set_ylim([0, 120000])
-    ax_absrow.set_ylim([0, 12000])
+    ax_abschina.set_ylim([0, 130000])
+    ax_absrow.set_ylim([0, 13000])
 
     # label axis
     plt.xlabel("date")
@@ -312,14 +314,14 @@ for l in range(plot_start, entries+4):
     ax_abschina.fill_between(china_data_x,
                              np.zeros(current_date_index),
                              recovered_by_region[MAINLAND_CHINA][:current_date_index],
-                             color="#a1dbb1", ec=china_color, alpha=0.5)
+                             color=china_recovered_color, ec=china_color, alpha=0.5)
 
     ax_absrow.plot(row_data_x, row_data_y, "o",
                    color=row_color, markersize=7, zorder=10)
     ax_absrow.fill_between(row_data_x, np.zeros(current_date_index),
                            total_recovered[:current_date_index] -
                            recovered_by_region[MAINLAND_CHINA][:current_date_index],
-                           color="#3fa45b", alpha=0.5)
+                           color=row_recovered_color, alpha=0.5)
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
@@ -394,7 +396,6 @@ for l in range(plot_start, entries+4):
             ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.1)
 
-    plt.title("see comments for further explanations")
     plt.tight_layout()
 
     ax_pie = plt.axes([.12, .3, .35, .9])
@@ -452,6 +453,30 @@ for l in range(plot_start, entries+4):
                                     loc='lower center')
     piechart_legend.get_frame().set_edgecolor("black")
     piechart_legend.set_zorder(20)
+
+    legendel_china_regression = Line2D(
+        [0], [0], color=china_regression_color, lw=4)
+    legendel_china_recovered = Patch(
+        facecolor=china_recovered_color, alpha=0.5)
+    legendel_spacer= Patch(facecolor="none")
+    legendel_row_regression = Line2D(
+        [0], [0], color=row_regression_color, lw=4)
+    legendel_row_recovered = Patch(
+        facecolor=row_recovered_color, alpha=0.5)
+
+    total_legend = ax_abschina.legend([legendel_china_regression,
+                                     legendel_china_recovered,
+                                     legendel_spacer,
+                                     legendel_row_regression,
+                                     legendel_row_recovered],
+                                    ["Infections in China\nfitted to an logistic function",
+                                     "Recovered cases in China",
+                                     "",
+                                     "Infections outside China\nfitted to an exponential function",
+                                     "Recovered cases outside China"],
+                                    loc='upper right')
+    total_legend.get_frame().set_edgecolor("black")
+    total_legend.set_zorder(20)
 
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
