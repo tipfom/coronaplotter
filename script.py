@@ -299,7 +299,7 @@ for l in range(plot_start, len(china_total_infections)+4):
     last_bottom = np.zeros(current_date_index)
     for i in range(1, OTHER+1):
         reg_data = get_regional_row_data(i, current_date_index)
-        ax_absrow.bar(row_data_x, reg_data,
+        ax_absrow.bar(row_data_x, reg_data, width=0.3,
                       color=barchart_colors[i], bottom=last_bottom)
         last_bottom += reg_data
 
@@ -385,7 +385,37 @@ for l in range(plot_start, len(china_total_infections)+4):
                labels=["Recovered", "Infected", "Dead"],
                colors=piechart_colors, startangle=90, radius=500, shadow=True)
     ax_pie.axis("equal")
-    plt.title("global breakdown\nof infection states\n")
+    # these objects are used to create a consistent legend
+    legendel_westerpacificregion = Patch(facecolor=barchart_colors[1])
+    legendel_europeanregion = Patch(facecolor=barchart_colors[2])
+    legendel_southeastasiaregion = Patch(
+        facecolor=barchart_colors[3])
+    legendel_easternmediterraneanregion = Patch(
+        facecolor=barchart_colors[4])
+    legendel_regionoftheamericans = Patch(
+        facecolor=barchart_colors[5])
+    legendel_africanregion = Patch(facecolor=barchart_colors[6])
+    legendel_other = Patch(facecolor=barchart_colors[7])
+
+    # add the legend and object descriptions
+    legend = ax_abschina.legend([legendel_westerpacificregion,
+                                 legendel_europeanregion,
+                                 legendel_southeastasiaregion,
+                                 legendel_easternmediterraneanregion,
+                                 legendel_regionoftheamericans,
+                                 legendel_africanregion,
+                                 legendel_other],
+                                ["Western Pacific Region",
+                                 "European Region",
+                                 "South-East Asia Region",
+                                 "Eastern Mediterranean Region",
+                                 "Region of the Americans",
+                                 "African Region",
+                                 "Other"],
+                                loc='upper right')
+    legend.get_frame().set_edgecolor("black")
+    legend.set_zorder(20)
+
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
     plt.close()
