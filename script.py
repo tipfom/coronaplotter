@@ -129,22 +129,6 @@ with open(datafile_recovered_name) as datafile:
     for row in datafile_reader:
         data_recovered_raw.append(row)
 
-# for i in range(3, len(data_WHO_raw[0])):
-#    row_distribution.append({"Western Pacific Region": 0, "South-East Asia Region": 0,
-#                             "Region of the Americas": 0, "European Region": 0, "Eastern Mediterranean Region": 0, "Other": 0})
-
-# for i in range(len(data_confirmed_raw)):
-#    if(i == 2):
-#        for j in range(3, len(data_WHO_raw[i])):
-#            china_total_infections.append(int(data_WHO_raw[i][j]))
-#    elif (i == 3):
-#        for j in range(3, len(data_WHO_raw[i])):
-#            row_total_infections.append(int(data_WHO_raw[i][j]))
-#    elif (i > 43):
-#        for j in range(3, len(data_WHO_raw[i])):
-#            if(data_WHO_raw[i][j] != ""):
-#                row_distribution[j-3][data_WHO_raw[i][2]] += int(data_WHO_raw[i][j])
-
 for i in range(4, len(data_deaths_raw[0])):
     recovered_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
     dead_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
@@ -169,10 +153,11 @@ for i in range(4, len(data_deaths_raw[0])):
     total_dead = np.sum(dead_by_region)
 
     china_total_infections.append(confirmed_by_region[MAINLAND_CHINA])
-    row_total_infections.append(total_confirmed - confirmed_by_region[MAINLAND_CHINA])
+    row_total_infections.append(
+        total_confirmed - confirmed_by_region[MAINLAND_CHINA])
     infected_recovered_dead_distribution.append(
         {"Recovered": total_recovered, "Infected": total_confirmed - total_dead - total_recovered, "Dead": total_dead})
-    infected_by_region_distribution.append(confirmed_by_region - dead_by_region - recovered_by_region)
+    infected_by_region_distribution.append(confirmed_by_region)
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -191,6 +176,13 @@ def china_fit_function(x, a, b, c):
     return a/(1+np.exp(-b*(x-c)))  # sigmoidal
 
 
+def get_regional_row_data(region, last=len(infected_by_region_distribution)):
+    regional_data = []
+    for i in range(last):
+        regional_data.append(infected_by_region_distribution[i][region])
+    return regional_data
+
+
 plot_start = 11
 china_regression_start = 16  # index to start plotting the sigmoidal fit
 row_regression_start = 11
@@ -202,17 +194,29 @@ xmax = 42
 xstep = 7
 
 # colors
-china_color = np.array([18, 141, 179]) / 255
-china_growth_color = np.array([51, 207, 255]) / 255
-china_regression_color = np.array([56, 209, 255]) / 255
+china_color = "#1866b4"  # np.array([18, 141, 179]) / 255
+china_regression_color = "#5899DA"  # np.array([56, 209, 255]) / 255
 
-row_color = np.array([179, 98, 18]) / 255
-row_growth_color = np.array([255, 166, 77]) / 255
-row_regression_color = np.array([255, 152, 51]) / 255
+row_color = "#596468"  # np.array([179, 98, 18]) / 255
+row_regression_color = "#848f94"  # np.array([255, 152, 51]) / 255
 
-piechart_colors = [np.array([173, 255, 152]) / 255,  # recovered
-                   np.array([179, 144, 125]) / 255,  # infected
-                   np.array([180, 179, 255]) / 255]  # dead
+piechart_colors = ["#3fb68e",  # recovered
+                   "#ef8d5d",  # infected
+                   "#9ea8ad",  # dead
+                   "#0e8c62",
+                   "#da5a1b",
+                   "#848f94"]
+
+barchart_colors = [
+    "#000000",  # MAINLAND_CHINA = 0
+    "#5899DA",  # WESTERN_PACIFIC_REGION = 1
+    "#E8743B",  # EUROPEAN_REGION = 2
+    "#19A979",  # SOUTH_EAST_ASIA_REGION = 3
+    "#ED4A7B",  # EASTERN_MEDITERRANEAN_REGION = 4
+    "#945ECF",  # REGION_OF_THE_AMERICANS = 5
+    "#13A4B4",  # AFRICAN_REGION = 6
+    "#6C8893",  # OTHER = 7
+]
 
 # create animation frames
 for l in range(plot_start, len(china_total_infections)+4):
@@ -262,8 +266,8 @@ for l in range(plot_start, len(china_total_infections)+4):
     ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
 
     # setting the y-axis limit
-    ax_abschina.set_ylim([0, 100000])
-    ax_absrow.set_ylim([0, 10000])
+    ax_abschina.set_ylim([0, 120000])
+    ax_absrow.set_ylim([0, 12000])
 
     # label axis
     plt.xlabel("date")
@@ -291,6 +295,13 @@ for l in range(plot_start, len(china_total_infections)+4):
 
     ax_absrow.plot(row_data_x, row_data_y, "o",
                    color=row_color, markersize=7, zorder=10)
+
+    last_bottom = np.zeros(current_date_index)
+    for i in range(1, OTHER+1):
+        reg_data = get_regional_row_data(i, current_date_index)
+        ax_absrow.bar(row_data_x, reg_data,
+                      color=barchart_colors[i], bottom=last_bottom)
+        last_bottom += reg_data
 
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
