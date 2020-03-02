@@ -164,9 +164,12 @@ for i in range(4, len(data_deaths_raw[0])):
     column_total_dead = 0
 
     for i in range(OTHER):
-        confirmed_by_region[i] = np.append(confirmed_by_region[i], column_confirmed_by_region[i])
-        recovered_by_region[i] = np.append(recovered_by_region[i], column_recovered_by_region[i])
-        dead_by_region[i] = np.append(dead_by_region[i], column_dead_by_region[i])
+        confirmed_by_region[i] = np.append(
+            confirmed_by_region[i], column_confirmed_by_region[i])
+        recovered_by_region[i] = np.append(
+            recovered_by_region[i], column_recovered_by_region[i])
+        dead_by_region[i] = np.append(
+            dead_by_region[i], column_dead_by_region[i])
 
         column_total_confirmed += column_confirmed_by_region[i]
         column_total_recovered += column_recovered_by_region[i]
@@ -210,11 +213,11 @@ china_regression_color = "#5899DA"  # np.array([56, 209, 255]) / 255
 row_color = "#596468"  # np.array([179, 98, 18]) / 255
 row_regression_color = "#848f94"  # np.array([255, 152, 51]) / 255
 
-piechart_colors = ["#3fb68e",  # recovered
-                   "#f5b04d",  # infected
-                   "#9ea8ad",  # dead
-                   "#0e8c62",
-                   "#da5a1b",
+piechart_colors = ["#66c2a3",  # recovered
+                   "#19A979",
+                   "#f5aa85",  # infected
+                   "#E8743B",
+                   "#bac1c4",  # dead
                    "#848f94"]
 
 barchart_colors = [
@@ -392,13 +395,26 @@ for l in range(plot_start, entries+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.1, .50, .35, .35])
-    ax_pie.pie([total_recovered[current_date_index],
-                total_confirmed[current_date_index] -
-                total_dead[current_date_index] -
-                total_recovered[current_date_index],
-                total_dead[current_date_index]],
-               labels=["Recovered", "Infected", "Dead"],
-               colors=piechart_colors, startangle=90, radius=500, shadow=True)
+    china_total_recovered = recovered_by_region[MAINLAND_CHINA][current_date_index]
+    row_total_recovered = total_recovered[current_date_index] - \
+        china_total_recovered
+
+    china_total_infected = confirmed_by_region[MAINLAND_CHINA][current_date_index] - \
+        dead_by_region[MAINLAND_CHINA][current_date_index] - \
+        recovered_by_region[MAINLAND_CHINA][current_date_index]
+    row_total_infected = total_confirmed[current_date_index] - \
+        total_recovered[current_date_index] - \
+        total_dead[current_date_index] - china_total_infected
+
+    china_total_dead = dead_by_region[MAINLAND_CHINA][current_date_index]
+    row_total_dead = total_dead[current_date_index] - \
+        china_total_dead
+
+    ax_pie.pie([china_total_recovered, row_total_recovered,
+                china_total_infected, row_total_infected,
+                china_total_dead, row_total_dead],
+               labels=["Recovered", "", "Infected", "", "Dead", ""],
+               colors=piechart_colors, startangle=90, radius=500)
     ax_pie.axis("equal")
     # these objects are used to create a consistent legend
     legendel_westerpacificregion = Patch(facecolor=barchart_colors[1])
