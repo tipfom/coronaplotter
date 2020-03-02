@@ -76,12 +76,14 @@ region_map = {
     "San Marino": EUROPEAN_REGION,
     "Luxembourg": EUROPEAN_REGION,
     "Iceland": EUROPEAN_REGION,
+    "Czech Republic": EUROPEAN_REGION,
 
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "India": SOUTH_EAST_ASIA_REGION,
     "Nepal": SOUTH_EAST_ASIA_REGION,
     "Sri Lanka": SOUTH_EAST_ASIA_REGION,
 
+    "Armenia": EASTERN_MEDITERRANEAN_REGION, # ????????????
     "Iran": EASTERN_MEDITERRANEAN_REGION,
     "Kuwait": EASTERN_MEDITERRANEAN_REGION,
     "Bahrain": EASTERN_MEDITERRANEAN_REGION,
@@ -98,7 +100,8 @@ region_map = {
     "Canada": REGION_OF_THE_AMERICANS,
     "Brazil": REGION_OF_THE_AMERICANS,
     "Mexico": REGION_OF_THE_AMERICANS,
-    "Ecuadoe": REGION_OF_THE_AMERICANS,
+    "Ecuador": REGION_OF_THE_AMERICANS,
+    "Dominican Republic": REGION_OF_THE_AMERICANS, # ????????????
 
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
@@ -114,7 +117,7 @@ total_confirmed = np.array([])
 total_recovered = np.array([])
 total_dead = np.array([])
 
-for i in range(OTHER):
+for i in range(OTHER+1):
     recovered_by_region.append(np.array([]))
     confirmed_by_region.append(np.array([]))
     dead_by_region.append(np.array([]))
@@ -137,7 +140,7 @@ with open(datafile_recovered_name) as datafile:
     for row in datafile_reader:
         data_recovered_raw.append(row)
 
-entries = len(data_deaths_raw[0]) - 5
+entries = len(data_deaths_raw[0]) - 4
 for i in range(4, len(data_deaths_raw[0])):
     column_recovered_by_region = np.zeros(8)
     column_dead_by_region = np.zeros(8)
@@ -163,7 +166,7 @@ for i in range(4, len(data_deaths_raw[0])):
     column_total_recovered = 0
     column_total_dead = 0
 
-    for i in range(OTHER):
+    for i in range(OTHER+1):
         confirmed_by_region[i] = np.append(
             confirmed_by_region[i], column_confirmed_by_region[i])
         recovered_by_region[i] = np.append(
@@ -185,8 +188,6 @@ matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
 
 # function definition for the exponential fit with parameters a, b
-
-
 def row_fit_function(x, a, b):
     return a*np.exp(b*x)  # exponential
 
@@ -311,7 +312,7 @@ for l in range(plot_start, entries+4):
                    color=row_color, markersize=7, zorder=10)
 
     last_bottom = np.zeros(current_date_index)
-    for i in range(1, OTHER):
+    for i in range(1, OTHER+1):
         reg_data = confirmed_by_region[i][0:current_date_index]
         ax_absrow.bar(row_data_x, reg_data, width=0.3,
                       color=barchart_colors[i], bottom=last_bottom)
@@ -395,19 +396,20 @@ for l in range(plot_start, entries+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.1, .50, .35, .35])
-    china_total_recovered = recovered_by_region[MAINLAND_CHINA][current_date_index]
-    row_total_recovered = total_recovered[current_date_index] - \
+    entry_index=current_date_index-1
+    china_total_recovered = recovered_by_region[MAINLAND_CHINA][entry_index]
+    row_total_recovered = total_recovered[entry_index] - \
         china_total_recovered
 
-    china_total_infected = confirmed_by_region[MAINLAND_CHINA][current_date_index] - \
-        dead_by_region[MAINLAND_CHINA][current_date_index] - \
-        recovered_by_region[MAINLAND_CHINA][current_date_index]
-    row_total_infected = total_confirmed[current_date_index] - \
-        total_recovered[current_date_index] - \
-        total_dead[current_date_index] - china_total_infected
+    china_total_infected = confirmed_by_region[MAINLAND_CHINA][entry_index] - \
+        dead_by_region[MAINLAND_CHINA][entry_index] - \
+        recovered_by_region[MAINLAND_CHINA][entry_index]
+    row_total_infected = total_confirmed[entry_index] - \
+        total_recovered[entry_index] - \
+        total_dead[entry_index] - china_total_infected
 
-    china_total_dead = dead_by_region[MAINLAND_CHINA][current_date_index]
-    row_total_dead = total_dead[current_date_index] - \
+    china_total_dead = dead_by_region[MAINLAND_CHINA][entry_index]
+    row_total_dead = total_dead[entry_index] - \
         china_total_dead
 
     ax_pie.pie([china_total_recovered, row_total_recovered,
