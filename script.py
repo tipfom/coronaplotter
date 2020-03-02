@@ -399,21 +399,6 @@ for l in range(plot_start, entries+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.12, .3, .35, .9])
-    entry_index = current_date_index-1
-    china_total_recovered = recovered_by_region[MAINLAND_CHINA][entry_index]
-    row_total_recovered = total_recovered[entry_index] - \
-        china_total_recovered
-
-    china_total_infected = confirmed_by_region[MAINLAND_CHINA][entry_index] - \
-        dead_by_region[MAINLAND_CHINA][entry_index] - \
-        recovered_by_region[MAINLAND_CHINA][entry_index]
-    row_total_infected = total_confirmed[entry_index] - \
-        total_recovered[entry_index] - \
-        total_dead[entry_index] - china_total_infected
-
-    china_total_dead = dead_by_region[MAINLAND_CHINA][entry_index]
-    row_total_dead = total_dead[entry_index] - \
-        china_total_dead
 
     piechart_data = [0]
     for i in range(1, OTHER+1):
