@@ -395,7 +395,7 @@ for l in range(plot_start, entries+4):
     plt.title("see comments for further explanations")
     plt.tight_layout()
 
-    ax_pie = plt.axes([.1, .50, .35, .35])
+    ax_pie = plt.axes([.1, .58, .35, .35])
     entry_index=current_date_index-1
     china_total_recovered = recovered_by_region[MAINLAND_CHINA][entry_index]
     row_total_recovered = total_recovered[entry_index] - \
