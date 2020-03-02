@@ -397,7 +397,7 @@ for l in range(plot_start, entries+4):
     plt.title("see comments for further explanations")
     plt.tight_layout()
 
-    ax_pie = plt.axes([.1, .58, .35, .35])
+    ax_pie = plt.axes([.12, .3, .35, .9])
     entry_index = current_date_index-1
     china_total_recovered = recovered_by_region[MAINLAND_CHINA][entry_index]
     row_total_recovered = total_recovered[entry_index] - \
@@ -419,8 +419,7 @@ for l in range(plot_start, entries+4):
         reg_data = confirmed_by_region[i][current_date_index-1]
         piechart_data.append(reg_data)
 
-    ax_pie.pie(piechart_data, colors=barchart_colors,
-               startangle=90, radius=500)
+    ax_pie.pie(piechart_data, colors=barchart_colors, startangle=90)
     ax_pie.axis("equal")
     # these objects are used to create a consistent legend
     legendel_china = Patch(facecolor=barchart_colors[0])
@@ -436,25 +435,23 @@ for l in range(plot_start, entries+4):
     legendel_other = Patch(facecolor=barchart_colors[7])
 
     # add the legend and object descriptions
-    legend = ax_abschina.legend([legendel_china,
-                                 legendel_westerpacificregion,
-                                 legendel_europeanregion,
-                                 legendel_southeastasiaregion,
-                                 legendel_easternmediterraneanregion,
-                                 legendel_regionoftheamericans,
-                                 legendel_africanregion,
-                                 legendel_other],
-                                ["Mainland China",
-                                 "Western Pacific Region",
-                                 "European Region",
-                                 "South-East Asia Region",
-                                 "Eastern Mediterranean Region",
-                                 "Region of the Americans",
-                                 "African Region",
-                                 "Other"],
-                                loc='upper right')
-    legend.get_frame().set_edgecolor("black")
-    legend.set_zorder(20)
+    piechart_legend = ax_pie.legend([legendel_westerpacificregion,
+                                     legendel_europeanregion,
+                                     legendel_southeastasiaregion,
+                                     legendel_easternmediterraneanregion,
+                                     legendel_regionoftheamericans,
+                                     legendel_africanregion,
+                                     legendel_other],
+                                    ["Western Pacific Region",
+                                     "European Region",
+                                     "South-East Asia Region",
+                                     "Eastern Mediterranean Region",
+                                     "Region of the Americans",
+                                     "African Region",
+                                     "Other"],
+                                    loc='lower center')
+    piechart_legend.get_frame().set_edgecolor("black")
+    piechart_legend.set_zorder(20)
 
     # save the plot in the current folder
     plt.savefig(str(l) + ".png")
