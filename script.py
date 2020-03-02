@@ -22,11 +22,6 @@ datafile_deaths_name = jhu_submodule_path + "time_series_19-covid-Deaths.csv"
 datafile_recovered_name = jhu_submodule_path + \
     "time_series_19-covid-Recovered.csv"
 
-china_total_infections = []
-row_total_infections = []
-infected_by_region_distribution = []
-infected_recovered_dead_distribution = []
-
 MAINLAND_CHINA = 0
 WESTERN_PACIFIC_REGION = 1
 EUROPEAN_REGION = 2
@@ -111,6 +106,19 @@ region_map = {
     "Others": OTHER,
 }
 
+recovered_by_region = []
+confirmed_by_region = []
+dead_by_region = []
+
+total_confirmed = np.array([])
+total_recovered = np.array([])
+total_dead = np.array([])
+
+for i in range(OTHER):
+    recovered_by_region.append(np.array([]))
+    confirmed_by_region.append(np.array([]))
+    dead_by_region.append(np.array([]))
+
 data_confirmed_raw = []
 with open(datafile_confirmed_name) as datafile:
     datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
@@ -129,10 +137,11 @@ with open(datafile_recovered_name) as datafile:
     for row in datafile_reader:
         data_recovered_raw.append(row)
 
+entries = len(data_deaths_raw[0]) - 5
 for i in range(4, len(data_deaths_raw[0])):
-    recovered_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-    dead_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-    confirmed_by_region = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    column_recovered_by_region = np.zeros(8)
+    column_dead_by_region = np.zeros(8)
+    column_confirmed_by_region = np.zeros(8)
 
     for j in range(1, len(data_deaths_raw)):
         country = data_confirmed_raw[j][1]
@@ -140,24 +149,32 @@ for i in range(4, len(data_deaths_raw[0])):
             region = region_map[country]
 
             if(data_confirmed_raw[j][i] != ""):
-                confirmed_by_region[region] += int(data_confirmed_raw[j][i])
+                column_confirmed_by_region[region] += int(
+                    data_confirmed_raw[j][i])
             if(data_deaths_raw[j][i] != ""):
-                dead_by_region[region] += int(data_deaths_raw[j][i])
+                column_dead_by_region[region] += int(data_deaths_raw[j][i])
             if(data_recovered_raw[j][i] != ""):
-                recovered_by_region[region] += int(data_recovered_raw[j][i])
+                column_recovered_by_region[region] += int(
+                    data_recovered_raw[j][i])
         else:
             print("could not find region for " + country)
 
-    total_confirmed = np.sum(confirmed_by_region)
-    total_recovered = np.sum(recovered_by_region)
-    total_dead = np.sum(dead_by_region)
+    column_total_confirmed = 0
+    column_total_recovered = 0
+    column_total_dead = 0
 
-    china_total_infections.append(confirmed_by_region[MAINLAND_CHINA])
-    row_total_infections.append(
-        total_confirmed - confirmed_by_region[MAINLAND_CHINA])
-    infected_recovered_dead_distribution.append(
-        {"Recovered": total_recovered, "Infected": total_confirmed - total_dead - total_recovered, "Dead": total_dead})
-    infected_by_region_distribution.append(confirmed_by_region)
+    for i in range(OTHER):
+        confirmed_by_region[i] = np.append(confirmed_by_region[i], column_confirmed_by_region[i])
+        recovered_by_region[i] = np.append(recovered_by_region[i], column_recovered_by_region[i])
+        dead_by_region[i] = np.append(dead_by_region[i], column_dead_by_region[i])
+
+        column_total_confirmed += column_confirmed_by_region[i]
+        column_total_recovered += column_recovered_by_region[i]
+        column_total_dead += column_dead_by_region[i]
+
+    total_confirmed = np.append(total_confirmed, column_total_confirmed)
+    total_recovered = np.append(total_recovered, column_total_recovered)
+    total_dead = np.append(total_dead, column_total_dead)
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -174,13 +191,6 @@ def row_fit_function(x, a, b):
 # function definition for the sigmoidal fit with parameters a, b, c
 def china_fit_function(x, a, b, c):
     return a/(1+np.exp(-b*(x-c)))  # sigmoidal
-
-
-def get_regional_row_data(region, last=len(infected_by_region_distribution)):
-    regional_data = []
-    for i in range(last):
-        regional_data.append(infected_by_region_distribution[i][region])
-    return regional_data
 
 
 plot_start = 11
@@ -219,19 +229,20 @@ barchart_colors = [
 ]
 
 # create animation frames
-for l in range(plot_start, len(china_total_infections)+4):
+for l in range(plot_start, entries+4):
     current_date_index = l  # index of the last data point to be used
     desired_fit_count = 3  # number of previous fits to include
 
-    if l > len(china_total_infections):  # used to fade out the last three plots
-        current_date_index = len(china_total_infections)
+    if l > entries:  # used to fade out the last three plots
+        current_date_index = entries
         desired_fit_count = 3 - (l - current_date_index)+1
 
     china_data_x = np.arange(0, current_date_index)
-    china_data_y = china_total_infections[0:current_date_index]
+    china_data_y = confirmed_by_region[MAINLAND_CHINA][0:current_date_index]
 
-    row_data_x = china_data_x[0:current_date_index]
-    row_data_y = row_total_infections[0:current_date_index]
+    row_data_x = china_data_x
+    row_data_y = (total_confirmed -
+                  confirmed_by_region[MAINLAND_CHINA])[0:current_date_index]
 
     # creation of pyplot plot
     fig, ax_abschina = plt.subplots()
@@ -297,8 +308,8 @@ for l in range(plot_start, len(china_total_infections)+4):
                    color=row_color, markersize=7, zorder=10)
 
     last_bottom = np.zeros(current_date_index)
-    for i in range(1, OTHER+1):
-        reg_data = get_regional_row_data(i, current_date_index)
+    for i in range(1, OTHER):
+        reg_data = confirmed_by_region[i][0:current_date_index]
         ax_absrow.bar(row_data_x, reg_data, width=0.3,
                       color=barchart_colors[i], bottom=last_bottom)
         last_bottom += reg_data
@@ -381,7 +392,11 @@ for l in range(plot_start, len(china_total_infections)+4):
     plt.tight_layout()
 
     ax_pie = plt.axes([.1, .50, .35, .35])
-    ax_pie.pie(infected_recovered_dead_distribution[current_date_index-1].values(),
+    ax_pie.pie([total_recovered[current_date_index],
+                total_confirmed[current_date_index] -
+                total_dead[current_date_index] -
+                total_recovered[current_date_index],
+                total_dead[current_date_index]],
                labels=["Recovered", "Infected", "Dead"],
                colors=piechart_colors, startangle=90, radius=500, shadow=True)
     ax_pie.axis("equal")
@@ -439,12 +454,12 @@ for current_date_index in range(0, initial_frame_repeatcount):
     video.write(cv2.imread("./" + str(plot_start) + ".png"))
 
 # animation frames
-for current_date_index in range(plot_start + 1, len(china_total_infections)+3):
+for current_date_index in range(plot_start + 1, entries+3):
     video.write(cv2.imread("./" + str(current_date_index) + ".png"))
 
 # write final frame repeatedly
 for current_date_index in range(0, final_frame_repeatcount):
-    video.write(cv2.imread("./" + str(len(china_total_infections)+3) + ".png"))
+    video.write(cv2.imread("./" + str(entries+3) + ".png"))
 
 # save video
 cv2.destroyAllWindows()
