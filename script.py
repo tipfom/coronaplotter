@@ -79,7 +79,7 @@ region_map = {
     "Czech Republic": EUROPEAN_REGION,
     "Andorra": EUROPEAN_REGION,
     "Portugal": EUROPEAN_REGION,
-    "Latvia":EUROPEAN_REGION,
+    "Latvia": EUROPEAN_REGION,
 
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "Indonesia": SOUTH_EAST_ASIA_REGION,
@@ -110,7 +110,7 @@ region_map = {
 
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
-    "Morocco": AFRICAN_REGION, 
+    "Morocco": AFRICAN_REGION,
     "Senegal": AFRICAN_REGION,
 
     "Others": OTHER,
@@ -212,7 +212,7 @@ row_regression_start = 11
 
 # x-axis range
 xmin = 0
-xmax = 42
+xmax = 49
 # steps between major ticks on x-axi
 xstep = 7
 
@@ -260,8 +260,10 @@ for l in range(plot_start, entries+4):
                   confirmed_by_region[MAINLAND_CHINA])[0:current_date_index]
 
     # creation of pyplot plot
-    fig, ax_abschina = plt.subplots()
-    ax_absrow = ax_abschina.twinx()
+    fig, ax_shared = plt.subplots()
+    ax_shared.yaxis.tick_right()
+    ax_shared.yaxis.set_label_position("right")
+    ax_shared.spines['left'].set_color("none")
 
     # setting the dimensions (basically resolution with 12by9 aspect ratio)
     fig.set_figheight(10)
@@ -275,60 +277,42 @@ for l in range(plot_start, entries+4):
         majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
 
     # setting the x-axis ticks
-    ax_abschina.set_xlim([xmin, xmax])
+    ax_shared.set_xlim([xmin, xmax])
     plt.xticks(majxticks[0], majxticks[1])
-    ax_abschina.xaxis.set_minor_locator(MultipleLocator(1))
-    ax_abschina.tick_params(axis="x", which="major", length=8, width=1.5)
-    ax_abschina.tick_params(axis="x", which="minor", length=5, width=1)
+    ax_shared.xaxis.set_minor_locator(MultipleLocator(1))
+    ax_shared.tick_params(axis="x", which="major", length=8, width=1.5)
+    ax_shared.tick_params(axis="x", which="minor", length=5, width=1)
 
     # setting the y-axis ticks
-    ax_abschina.set_yticks([0, 2e4, 4e4, 6e4, 8e4, 10e4, 12e4])
-    ax_abschina.set_yticklabels(
+    ax_shared.set_yticks([0, 2e4, 4e4, 6e4, 8e4, 10e4, 12e4])
+    ax_shared.set_yticklabels(
         ["0", "20k", "40k", "60k", "80k", "100k", "120k"])
-    ax_abschina.yaxis.set_minor_locator(MultipleLocator(10000))
-
-    ax_absrow.set_yticks([0, 2000, 4000, 6000, 8000, 1e4, 1.2e4])
-    ax_absrow.set_yticklabels(["0", "2k", "4k", "6k", "8k", "10k", "12k"])
-    ax_absrow.yaxis.set_minor_locator(MultipleLocator(1000))
+    ax_shared.yaxis.set_minor_locator(MultipleLocator(10000))
 
     # setting the y-axis limit
-    ax_abschina.set_ylim([0, 130000])
-    ax_absrow.set_ylim([0, 13000])
+    ax_shared.set_ylim([0, 130000])
 
     # label axis
     plt.xlabel("date")
-    ax_abschina.set_ylabel("total # of confirmed infections in Mainland China")
-    ax_absrow.set_ylabel("total # of confirmed infections outside China")
+    ax_shared.set_ylabel("total # of confirmed infections in Mainland China")
 
     # format the border of the diagram
-    ax_abschina.spines['top'].set_color('white')
-    ax_absrow.spines['top'].set_color('white')
-
-    ax_abschina.spines['left'].set_color(china_color)
-
-    ax_absrow.spines['left'].set_color("none")
-    ax_absrow.spines['right'].set_color(row_color)
-
-    ax_abschina.tick_params(axis="y", colors=china_color)
-    ax_abschina.yaxis.label.set_color(china_color)
-
-    ax_absrow.tick_params(axis="y", colors=row_color)
-    ax_absrow.yaxis.label.set_color(row_color)
+    ax_shared.spines['top'].set_color('white')
 
     # plot the original data
-    ax_abschina.plot(china_data_x, china_data_y, "s", color=china_color,
+    ax_shared.plot(china_data_x, china_data_y, "s", color=china_color,
                      markersize=7, zorder=10)
-    ax_abschina.fill_between(china_data_x,
+    ax_shared.fill_between(china_data_x,
                              np.zeros(current_date_index),
                              recovered_by_region[MAINLAND_CHINA][:current_date_index],
-                             color=china_recovered_color, ec=china_color, alpha=0.5)
+                             color=china_recovered_color, ec=china_color, alpha=0.5, hatch="//")
 
-    ax_absrow.plot(row_data_x, row_data_y, "o",
-                   color=row_color, markersize=7, zorder=10)
-    ax_absrow.fill_between(row_data_x, np.zeros(current_date_index),
-                           total_recovered[:current_date_index] -
-                           recovered_by_region[MAINLAND_CHINA][:current_date_index],
-                           color=row_recovered_color, alpha=0.5)
+    ax_shared.plot(row_data_x, row_data_y, "o",
+                     color=row_color, markersize=7, zorder=10)
+    ax_shared.fill_between(row_data_x, np.zeros(current_date_index),
+                             total_recovered[:current_date_index] -
+                             recovered_by_region[MAINLAND_CHINA][:current_date_index],
+                             color=row_recovered_color, alpha=0.5, hatch="..")
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
@@ -355,16 +339,16 @@ for l in range(plot_start, entries+4):
             print("a = " + str(a))
             print("b = " + str(b))
 
-            ax_absrow.plot(
+            ax_shared.plot(
                 nom_x, nom_y, color=row_regression_color, linewidth=3)
-            ax_absrow.fill_between(
+            ax_shared.fill_between(
                 nom_x, nom_y - std_y, nom_y + std_y, facecolor=row_regression_color, alpha=0.5)
         elif k == 1:
-            ax_absrow.fill_between(nom_x, nom_y - std_y, nom_y +
-                                   std_y, facecolor=row_regression_color, alpha=0.2)
+            ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
+                                     std_y, facecolor=row_regression_color, alpha=0.2)
         elif k == 2:
-            ax_absrow.fill_between(nom_x, nom_y - std_y, nom_y +
-                                   std_y, facecolor=row_regression_color, alpha=0.05)
+            ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
+                                     std_y, facecolor=row_regression_color, alpha=0.05)
 
     for k in range(0, np.min([desired_fit_count, current_date_index-china_regression_start])):
         # fit the sigmoidal function
@@ -392,20 +376,20 @@ for l in range(plot_start, entries+4):
             print("a = " + str(a))
             print("b = " + str(b))
             print("c = " + str(c))
-            ax_abschina.plot(
+            ax_shared.plot(
                 nom_x, nom_y, color=china_regression_color, linewidth=3)
-            ax_abschina.fill_between(
+            ax_shared.fill_between(
                 nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color, alpha=0.6)
         elif k == 1:
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
+            ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.2)
         elif k == 2:
-            ax_abschina.fill_between(nom_x, nom_y - std_y, nom_y +
+            ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
                                      std_y, facecolor=china_regression_color, alpha=0.1)
 
     plt.tight_layout()
 
-    ax_pie = plt.axes([.12, .3, .35, .9])
+    ax_pie = plt.axes([.03, .3, .35, .9])
 
     piechart_data = [0]
     for i in range(1, OTHER+1):
@@ -414,7 +398,7 @@ for l in range(plot_start, entries+4):
 
     ax_pie.pie(piechart_data, colors=barchart_colors, startangle=90)
     ax_pie.axis("equal")
-    ax_pie.text(-0.8, 1.1, "infections sorted by region")
+    ax_pie.text(-0.8, 1.1, "infections outside China by region")
 
     # these objects are used to create a consistent legend
     legendel_china = Patch(facecolor=barchart_colors[0])
@@ -448,25 +432,31 @@ for l in range(plot_start, entries+4):
     piechart_legend.get_frame().set_edgecolor("black")
     piechart_legend.set_zorder(20)
 
+    legendel_china_data = Line2D([0], [0], marker="s", color=china_color,
+                                lw=0, markerfacecolor=china_color, markersize=10)
     legendel_china_regression = Line2D(
         [0], [0], color=china_regression_color, lw=4)
     legendel_china_recovered = Patch(
-        facecolor=china_recovered_color, alpha=0.5)
+        facecolor=china_recovered_color, alpha=0.5, hatch="//")
     legendel_spacer = Patch(facecolor="none")
+    legendel_row_data = Line2D([0], [0], marker="o", color=row_color,
+                              lw=0, markerfacecolor=row_color, markersize=10)
     legendel_row_regression = Line2D(
         [0], [0], color=row_regression_color, lw=4)
     legendel_row_recovered = Patch(
-        facecolor=row_recovered_color, alpha=0.5)
+        facecolor=row_recovered_color, alpha=0.5, hatch="..")
 
-    total_legend = ax_abschina.legend([legendel_china_regression,
+    total_legend = ax_shared.legend([legendel_china_data,
+                                       legendel_china_regression,
                                        legendel_china_recovered,
-                                       legendel_spacer,
+                                       legendel_row_data,
                                        legendel_row_regression,
                                        legendel_row_recovered],
-                                      ["Infections in China\nfitted to an logistic function",
+                                      ["Infections in China",
+                                       "Adoption to an sigmoidal fit",
                                        "Recovered cases in China",
-                                       "",
-                                       "Infections outside China\nfitted to an exponential function",
+                                       "Infections outside China",
+                                       "Adoption to an exponential fit",
                                        "Recovered cases outside China"],
                                       loc='upper right')
     total_legend.get_frame().set_edgecolor("black")
