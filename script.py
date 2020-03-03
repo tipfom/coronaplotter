@@ -294,7 +294,7 @@ for l in range(plot_start, entries+4):
 
     # label axis
     plt.xlabel("date")
-    ax_shared.set_ylabel("total # of confirmed infections in Mainland China")
+    ax_shared.set_ylabel("total # of confirmed infections")
 
     # format the border of the diagram
     ax_shared.spines['top'].set_color('white')
