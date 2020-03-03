@@ -77,8 +77,12 @@ region_map = {
     "Luxembourg": EUROPEAN_REGION,
     "Iceland": EUROPEAN_REGION,
     "Czech Republic": EUROPEAN_REGION,
+    "Andorra": EUROPEAN_REGION,
+    "Portugal": EUROPEAN_REGION,
+    "Latvia":EUROPEAN_REGION,
 
     "Thailand": SOUTH_EAST_ASIA_REGION,
+    "Indonesia": SOUTH_EAST_ASIA_REGION,
     "India": SOUTH_EAST_ASIA_REGION,
     "Nepal": SOUTH_EAST_ASIA_REGION,
     "Sri Lanka": SOUTH_EAST_ASIA_REGION,
@@ -95,6 +99,7 @@ region_map = {
     "Afghanistan": EASTERN_MEDITERRANEAN_REGION,
     "Egypt": EASTERN_MEDITERRANEAN_REGION,
     "Qatar": EASTERN_MEDITERRANEAN_REGION,
+    "Saudi Arabia": EASTERN_MEDITERRANEAN_REGION,
 
     "US": REGION_OF_THE_AMERICANS,
     "Canada": REGION_OF_THE_AMERICANS,
@@ -105,6 +110,8 @@ region_map = {
 
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
+    "Morocco": AFRICAN_REGION, 
+    "Senegal": AFRICAN_REGION,
 
     "Others": OTHER,
 }
