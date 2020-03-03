@@ -4,7 +4,6 @@ import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import csv
 import scipy.optimize
 import uncertainties.unumpy as unp
 from matplotlib.lines import Line2D
@@ -13,6 +12,8 @@ from matplotlib.ticker import MultipleLocator
 from uncertainties import ufloat
 import os
 from colors import *
+from load import get_data_from_file
+from regions import *
 
 if not os.path.exists("./images/"):
     os.mkdir("./images/")
@@ -21,178 +22,17 @@ if not os.path.exists("./images/"):
 # to add another date simply append the # of infected people
 
 jhu_submodule_path = "./JHU-data/csse_covid_19_data/csse_covid_19_time_series/"
-datafile_confirmed_name = jhu_submodule_path + \
+datafile_confirmed = jhu_submodule_path + \
     "time_series_19-covid-Confirmed.csv"
-datafile_deaths_name = jhu_submodule_path + "time_series_19-covid-Deaths.csv"
-datafile_recovered_name = jhu_submodule_path + \
+datafile_deaths = jhu_submodule_path + "time_series_19-covid-Deaths.csv"
+datafile_recovered = jhu_submodule_path + \
     "time_series_19-covid-Recovered.csv"
 
-MAINLAND_CHINA = 0
-WESTERN_PACIFIC_REGION = 1
-EUROPEAN_REGION = 2
-SOUTH_EAST_ASIA_REGION = 3
-EASTERN_MEDITERRANEAN_REGION = 4
-REGION_OF_THE_AMERICANS = 5
-AFRICAN_REGION = 6
-OTHER = 7
 
-region_map = {
-    "Mainland China": MAINLAND_CHINA,
-    "Hong Kong": MAINLAND_CHINA,
-    "Macau": MAINLAND_CHINA,
-    "Taiwan": MAINLAND_CHINA,
-
-    "South Korea": WESTERN_PACIFIC_REGION,
-    "Japan": WESTERN_PACIFIC_REGION,
-    "Singapore": WESTERN_PACIFIC_REGION,
-    "Australia": WESTERN_PACIFIC_REGION,
-    "Malaysia": WESTERN_PACIFIC_REGION,
-    "Vietnam": WESTERN_PACIFIC_REGION,
-    "Philippines": WESTERN_PACIFIC_REGION,
-    "Cambodia": WESTERN_PACIFIC_REGION,
-    "New Zealand": WESTERN_PACIFIC_REGION,
-
-    "Italy": EUROPEAN_REGION,
-    "France": EUROPEAN_REGION,
-    "Germany": EUROPEAN_REGION,
-    "Spain": EUROPEAN_REGION,
-    "UK": EUROPEAN_REGION,
-    "Switzerland": EUROPEAN_REGION,
-    "Norway": EUROPEAN_REGION,
-    "Sweden": EUROPEAN_REGION,
-    "Austria": EUROPEAN_REGION,
-    "Croatia": EUROPEAN_REGION,
-    "Israel": EUROPEAN_REGION,
-    "Netherlands": EUROPEAN_REGION,
-    "Azerbaijan": EUROPEAN_REGION,
-    "Denmark": EUROPEAN_REGION,
-    "Georgia": EUROPEAN_REGION,
-    "Greece": EUROPEAN_REGION,
-    "Romania": EUROPEAN_REGION,
-    "Finland": EUROPEAN_REGION,
-    "Russia": EUROPEAN_REGION,
-    "Belarus": EUROPEAN_REGION,
-    "Belgium": EUROPEAN_REGION,
-    "Estonia": EUROPEAN_REGION,
-    "Ireland": EUROPEAN_REGION,
-    "Lithuania": EUROPEAN_REGION,
-    "Monaco": EUROPEAN_REGION,
-    "North Macedonia": EUROPEAN_REGION,
-    "San Marino": EUROPEAN_REGION,
-    "Luxembourg": EUROPEAN_REGION,
-    "Iceland": EUROPEAN_REGION,
-    "Czech Republic": EUROPEAN_REGION,
-    "Andorra": EUROPEAN_REGION,
-    "Portugal": EUROPEAN_REGION,
-    "Latvia": EUROPEAN_REGION,
-
-    "Thailand": SOUTH_EAST_ASIA_REGION,
-    "Indonesia": SOUTH_EAST_ASIA_REGION,
-    "India": SOUTH_EAST_ASIA_REGION,
-    "Nepal": SOUTH_EAST_ASIA_REGION,
-    "Sri Lanka": SOUTH_EAST_ASIA_REGION,
-
-    "Armenia": EASTERN_MEDITERRANEAN_REGION,  # ????????????
-    "Iran": EASTERN_MEDITERRANEAN_REGION,
-    "Kuwait": EASTERN_MEDITERRANEAN_REGION,
-    "Bahrain": EASTERN_MEDITERRANEAN_REGION,
-    "United Arab Emirates": EASTERN_MEDITERRANEAN_REGION,
-    "Iraq": EASTERN_MEDITERRANEAN_REGION,
-    "Oman": EASTERN_MEDITERRANEAN_REGION,
-    "Pakistan": EASTERN_MEDITERRANEAN_REGION,
-    "Lebanon": EASTERN_MEDITERRANEAN_REGION,
-    "Afghanistan": EASTERN_MEDITERRANEAN_REGION,
-    "Egypt": EASTERN_MEDITERRANEAN_REGION,
-    "Qatar": EASTERN_MEDITERRANEAN_REGION,
-    "Saudi Arabia": EASTERN_MEDITERRANEAN_REGION,
-
-    "US": REGION_OF_THE_AMERICANS,
-    "Canada": REGION_OF_THE_AMERICANS,
-    "Brazil": REGION_OF_THE_AMERICANS,
-    "Mexico": REGION_OF_THE_AMERICANS,
-    "Ecuador": REGION_OF_THE_AMERICANS,
-    "Dominican Republic": REGION_OF_THE_AMERICANS,  # ????????????
-
-    "Algeria": AFRICAN_REGION,
-    "Nigeria": AFRICAN_REGION,
-    "Morocco": AFRICAN_REGION,
-    "Senegal": AFRICAN_REGION,
-
-    "Others": OTHER,
-}
-
-recovered_by_region = []
-confirmed_by_region = []
-dead_by_region = []
-
-total_confirmed = np.array([])
-total_recovered = np.array([])
-total_dead = np.array([])
-
-for i in range(OTHER+1):
-    recovered_by_region.append(np.array([]))
-    confirmed_by_region.append(np.array([]))
-    dead_by_region.append(np.array([]))
-
-data_confirmed_raw = []
-with open(datafile_confirmed_name) as datafile:
-    datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
-    for row in datafile_reader:
-        data_confirmed_raw.append(row)
-
-data_deaths_raw = []
-with open(datafile_deaths_name) as datafile:
-    datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
-    for row in datafile_reader:
-        data_deaths_raw.append(row)
-
-data_recovered_raw = []
-with open(datafile_recovered_name) as datafile:
-    datafile_reader = csv.reader(datafile, delimiter=",", quotechar="\"")
-    for row in datafile_reader:
-        data_recovered_raw.append(row)
-
-entries = len(data_deaths_raw[0]) - 4
-for i in range(4, len(data_deaths_raw[0])):
-    column_recovered_by_region = np.zeros(8)
-    column_dead_by_region = np.zeros(8)
-    column_confirmed_by_region = np.zeros(8)
-
-    for j in range(1, len(data_deaths_raw)):
-        country = data_confirmed_raw[j][1]
-        if region_map.__contains__(country):
-            region = region_map[country]
-
-            if(data_confirmed_raw[j][i] != ""):
-                column_confirmed_by_region[region] += int(
-                    data_confirmed_raw[j][i])
-            if(data_deaths_raw[j][i] != ""):
-                column_dead_by_region[region] += int(data_deaths_raw[j][i])
-            if(data_recovered_raw[j][i] != ""):
-                column_recovered_by_region[region] += int(
-                    data_recovered_raw[j][i])
-        else:
-            print("could not find region for " + country)
-
-    column_total_confirmed = 0
-    column_total_recovered = 0
-    column_total_dead = 0
-
-    for i in range(OTHER+1):
-        confirmed_by_region[i] = np.append(
-            confirmed_by_region[i], column_confirmed_by_region[i])
-        recovered_by_region[i] = np.append(
-            recovered_by_region[i], column_recovered_by_region[i])
-        dead_by_region[i] = np.append(
-            dead_by_region[i], column_dead_by_region[i])
-
-        column_total_confirmed += column_confirmed_by_region[i]
-        column_total_recovered += column_recovered_by_region[i]
-        column_total_dead += column_dead_by_region[i]
-
-    total_confirmed = np.append(total_confirmed, column_total_confirmed)
-    total_recovered = np.append(total_recovered, column_total_recovered)
-    total_dead = np.append(total_dead, column_total_dead)
+recovered_by_region, recovered_total = get_data_from_file(datafile_recovered)
+confirmed_by_region, confirmed_total = get_data_from_file(datafile_confirmed)
+dead_by_region, dead_total = get_data_from_file(datafile_deaths)
+entries = len(recovered_total)
 
 # increase pyplot font size
 font = {'family': 'normal', 'weight': 'normal', 'size': 16}
@@ -243,7 +83,7 @@ for l in range(plot_start, entries+4):
     china_data_y = confirmed_by_region[MAINLAND_CHINA][0:current_date_index]
 
     row_data_x = china_data_x
-    row_data_y = (total_confirmed -
+    row_data_y = (confirmed_total -
                   confirmed_by_region[MAINLAND_CHINA])[0:current_date_index]
 
     # creation of pyplot plot
@@ -297,7 +137,7 @@ for l in range(plot_start, entries+4):
     ax_shared.plot(row_data_x, row_data_y, "o",
                      color=row_color, markersize=7, zorder=10)
     ax_shared.fill_between(row_data_x, np.zeros(current_date_index),
-                             total_recovered[:current_date_index] -
+                             recovered_total[:current_date_index] -
                              recovered_by_region[MAINLAND_CHINA][:current_date_index],
                              color=row_recovered_color, alpha=0.5, hatch="..")
     # create the exponential plots
