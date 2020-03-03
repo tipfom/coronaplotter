@@ -200,15 +200,23 @@ plt.rc('axes', labelsize=20)
 def row_fit_function(x, a, b):
     return a*np.exp(b*x)  # exponential
 
+def row_fit_jacobian(x, a, b):
+    return np.transpose([np.exp(b*x), a*x*np.exp(b*x)])
 
 # function definition for the sigmoidal fit with parameters a, b, c
 def china_fit_function(x, a, b, c):
     return a/(1+np.exp(-b*(x-c)))  # sigmoidal
 
+def china_fit_jacobian(x, a, b, c):
+    return np.transpose([
+        1/(1+np.exp(-b*(x-c))), 
+        -a/((1+np.exp(-b*(x-c)))**2)*(c-x)*np.exp(-b*(x-c)),
+        -a/((1+np.exp(-b*(x-c)))**2)*b*np.exp(-b*(x-c))])
+
 
 plot_start = 11
-china_regression_start = 16  # index to start plotting the sigmoidal fit
-row_regression_start = 11
+china_regression_start = 10  # index to start plotting the sigmoidal fit
+row_regression_start = 10
 
 # x-axis range
 xmin = 0
@@ -317,7 +325,7 @@ for l in range(plot_start, entries+4):
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
         popt, pcov = scipy.optimize.curve_fit(row_fit_function,  row_data_x[:current_date_index-k],
-                                              row_data_y[:current_date_index-k], p0=[5, 0.2])
+                                              row_data_y[:current_date_index-k], p0=[5, 0.2], jac=row_fit_jacobian)
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
@@ -353,7 +361,8 @@ for l in range(plot_start, entries+4):
     for k in range(0, np.min([desired_fit_count, current_date_index-china_regression_start])):
         # fit the sigmoidal function
         popt, pcov = scipy.optimize.curve_fit(
-            china_fit_function,  china_data_x[0:current_date_index-k],  china_data_y[0:current_date_index-k], p0=[80000, 0.4, 20])
+            china_fit_function,  china_data_x[0:current_date_index-k],  china_data_y[0:current_date_index-k], p0=[80000, 0.4, 20],
+            jac=china_fit_jacobian)
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
 
