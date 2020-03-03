@@ -11,6 +11,10 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
 from uncertainties import ufloat
+import os
+
+if not os.path.exists("./images/"):
+    os.mkdir("./images/")
 
 # data points, cummulative
 # to add another date simply append the # of infected people
@@ -472,7 +476,7 @@ for l in range(plot_start, entries+4):
     total_legend.set_zorder(20)
 
     # save the plot in the current folder
-    plt.savefig(str(l) + ".png")
+    plt.savefig("./images/" + str(l) + ".png")
     plt.close()
 
 # batch the images to a video
@@ -482,7 +486,7 @@ final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 video_name = 'video.mp4'  # name of the exported video
 
 # get video size data
-frame = cv2.imread("./" + str(plot_start) + ".png")
+frame = cv2.imread("./images/" + str(plot_start) + ".png")
 height, width, layers = frame.shape
 
 # create video writer
@@ -491,15 +495,15 @@ video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
 for current_date_index in range(0, initial_frame_repeatcount):
-    video.write(cv2.imread("./" + str(plot_start) + ".png"))
+    video.write(cv2.imread("./images/" + str(plot_start) + ".png"))
 
 # animation frames
 for current_date_index in range(plot_start + 1, entries+3):
-    video.write(cv2.imread("./" + str(current_date_index) + ".png"))
+    video.write(cv2.imread("./images/" + str(current_date_index) + ".png"))
 
 # write final frame repeatedly
 for current_date_index in range(0, final_frame_repeatcount):
-    video.write(cv2.imread("./" + str(entries+3) + ".png"))
+    video.write(cv2.imread("./images/" + str(entries+3) + ".png"))
 
 # save video
 cv2.destroyAllWindows()
