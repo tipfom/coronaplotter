@@ -140,16 +140,16 @@ for l in range(plot_start, entries+4):
     ax_shared.spines['top'].set_color('white')
 
     # plot the original data
-    ax_shared.plot(china_data_x, china_data_y, "s", color=china_color,
+    ax_shared.plot(data_x, china_data_y, "s", color=china_color,
                    markersize=7, zorder=10)
-    ax_shared.fill_between(china_data_x,
+    ax_shared.fill_between(data_x,
                            np.zeros(current_date_index),
                            recovered_by_region[MAINLAND_CHINA][:current_date_index],
                            color=china_recovered_color, ec=china_color, alpha=0.5, hatch="//")
 
-    ax_shared.plot(row_data_x, row_data_y, "o",
+    ax_shared.plot(data_x, row_data_y, "o",
                    color=row_color, markersize=7, zorder=10)
-    ax_shared.fill_between(row_data_x, np.zeros(current_date_index),
+    ax_shared.fill_between(data_x, np.zeros(current_date_index),
                            recovered_total[:current_date_index] -
                            recovered_by_region[MAINLAND_CHINA][:current_date_index],
                            color=row_recovered_color, alpha=0.5, hatch="..")
@@ -234,22 +234,22 @@ for l in range(plot_start, entries+4):
         reg_data=confirmed_by_region[i][current_date_index-1]
         piechart_data.append(reg_data)
 
-    ax_pie.pie(piechart_data, colors=barchart_colors, startangle=90)
+    ax_pie.pie(piechart_data, colors=piechart_colors, startangle=90)
     ax_pie.axis("equal")
     ax_pie.text(-1.0, 1.1, "infections outside China by region")
 
     # these objects are used to create a consistent legend
-    legendel_china=Patch(facecolor=barchart_colors[0])
-    legendel_westerpacificregion=Patch(facecolor=barchart_colors[1])
-    legendel_europeanregion=Patch(facecolor=barchart_colors[2])
+    legendel_china=Patch(facecolor=piechart_colors[0])
+    legendel_westerpacificregion=Patch(facecolor=piechart_colors[1])
+    legendel_europeanregion=Patch(facecolor=piechart_colors[2])
     legendel_southeastasiaregion=Patch(
-        facecolor=barchart_colors[3])
+        facecolor=piechart_colors[3])
     legendel_easternmediterraneanregion=Patch(
-        facecolor=barchart_colors[4])
+        facecolor=piechart_colors[4])
     legendel_regionoftheamericans=Patch(
-        facecolor=barchart_colors[5])
-    legendel_africanregion=Patch(facecolor=barchart_colors[6])
-    legendel_other=Patch(facecolor=barchart_colors[7])
+        facecolor=piechart_colors[5])
+    legendel_africanregion=Patch(facecolor=piechart_colors[6])
+    legendel_other=Patch(facecolor=piechart_colors[7])
 
     # add the legend and object descriptions
     piechart_legend=ax_pie.legend([legendel_westerpacificregion,
@@ -275,14 +275,14 @@ for l in range(plot_start, entries+4):
     legendel_china_regression=Line2D(
         [0], [0], color=china_regression_color, lw=4)
     legendel_china_recovered=Patch(
-        facecolor=china_recovered_color, alpha=0.5, hatch="//")
+        facecolor=china_recovered_color, alpha=0.5, hatch="//", edgecolor=china_recovered_color)
     legendel_spacer=Patch(facecolor="none")
     legendel_row_data=Line2D([0], [0], marker="o", color=row_color,
                                lw=0, markerfacecolor=row_color, markersize=10)
     legendel_row_regression=Line2D(
         [0], [0], color=row_regression_color, lw=4)
     legendel_row_recovered=Patch(
-        facecolor=row_recovered_color, alpha=0.5, hatch="..")
+        facecolor=row_recovered_color, alpha=0.5, hatch="..", edgecolor=row_recovered_color)
 
     total_legend=ax_shared.legend([legendel_china_data,
                                      legendel_china_regression,
