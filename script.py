@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 
 import cv2
@@ -10,7 +11,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
 from uncertainties import ufloat
-import os
+
 from colors import *
 from load import get_data_from_file
 from regions import *
@@ -18,8 +19,6 @@ from regions import *
 if not os.path.exists("./images/"):
     os.mkdir("./images/")
 
-# data points, cummulative
-# to add another date simply append the # of infected people
 
 jhu_submodule_path = "./JHU-data/csse_covid_19_data/csse_covid_19_time_series/"
 datafile_confirmed = jhu_submodule_path + \
@@ -28,33 +27,33 @@ datafile_deaths = jhu_submodule_path + "time_series_19-covid-Deaths.csv"
 datafile_recovered = jhu_submodule_path + \
     "time_series_19-covid-Recovered.csv"
 
-
 recovered_by_region, recovered_total = get_data_from_file(datafile_recovered)
 confirmed_by_region, confirmed_total = get_data_from_file(datafile_confirmed)
 dead_by_region, dead_total = get_data_from_file(datafile_deaths)
 entries = len(recovered_total)
 
+
 # increase pyplot font size
-font = {'family': 'normal', 'weight': 'normal', 'size': 16}
+font = {'family': 'sans-serif', 'weight': 'normal', 'size': 16}
 matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
 
-# function definition for the exponential fit with parameters a, b
-
 
 def row_fit_function(x, a, b):
-    return a*np.exp(b*x)  # exponential
+    return a*np.exp(b*x)
+
 
 def row_fit_jacobian(x, a, b):
     return np.transpose([np.exp(b*x), a*x*np.exp(b*x)])
 
-# function definition for the sigmoidal fit with parameters a, b, c
+
 def china_fit_function(x, a, b, c):
-    return a/(1+np.exp(-b*(x-c)))  # sigmoidal
+    return a/(1+np.exp(-b*(x-c)))
+
 
 def china_fit_jacobian(x, a, b, c):
     return np.transpose([
-        1/(1+np.exp(-b*(x-c))), 
+        1/(1+np.exp(-b*(x-c))),
         -a/((1+np.exp(-b*(x-c)))**2)*(c-x)*np.exp(-b*(x-c)),
         -a/((1+np.exp(-b*(x-c)))**2)*b*np.exp(-b*(x-c))])
 
@@ -68,7 +67,6 @@ xmin = 0
 xmax = 49
 # steps between major ticks on x-axi
 xstep = 7
-
 
 # create animation frames
 for l in range(plot_start, entries+4):
@@ -128,18 +126,18 @@ for l in range(plot_start, entries+4):
 
     # plot the original data
     ax_shared.plot(china_data_x, china_data_y, "s", color=china_color,
-                     markersize=7, zorder=10)
+                   markersize=7, zorder=10)
     ax_shared.fill_between(china_data_x,
-                             np.zeros(current_date_index),
-                             recovered_by_region[MAINLAND_CHINA][:current_date_index],
-                             color=china_recovered_color, ec=china_color, alpha=0.5, hatch="//")
+                           np.zeros(current_date_index),
+                           recovered_by_region[MAINLAND_CHINA][:current_date_index],
+                           color=china_recovered_color, ec=china_color, alpha=0.5, hatch="//")
 
     ax_shared.plot(row_data_x, row_data_y, "o",
-                     color=row_color, markersize=7, zorder=10)
+                   color=row_color, markersize=7, zorder=10)
     ax_shared.fill_between(row_data_x, np.zeros(current_date_index),
-                             recovered_total[:current_date_index] -
-                             recovered_by_region[MAINLAND_CHINA][:current_date_index],
-                             color=row_recovered_color, alpha=0.5, hatch="..")
+                           recovered_total[:current_date_index] -
+                           recovered_by_region[MAINLAND_CHINA][:current_date_index],
+                           color=row_recovered_color, alpha=0.5, hatch="..")
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-row_regression_start])):
         # fit the exponential function
@@ -172,15 +170,16 @@ for l in range(plot_start, entries+4):
                 nom_x, nom_y - std_y, nom_y + std_y, facecolor=row_regression_color, alpha=0.5)
         elif k == 1:
             ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=row_regression_color, alpha=0.2)
+                                   std_y, facecolor=row_regression_color, alpha=0.2)
         elif k == 2:
             ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=row_regression_color, alpha=0.05)
+                                   std_y, facecolor=row_regression_color, alpha=0.05)
 
     for k in range(0, np.min([desired_fit_count, current_date_index-china_regression_start])):
         # fit the sigmoidal function
         popt, pcov = scipy.optimize.curve_fit(
-            china_fit_function,  china_data_x[0:current_date_index-k],  china_data_y[0:current_date_index-k], p0=[80000, 0.4, 20],
+            china_fit_function,  china_data_x[0:current_date_index -
+                                              k],  china_data_y[0:current_date_index-k], p0=[80000, 0.4, 20],
             jac=china_fit_jacobian)
         # get errors from trace of covariance matrix
         perr = np.sqrt(np.diag(pcov))
@@ -210,10 +209,10 @@ for l in range(plot_start, entries+4):
                 nom_x, nom_y - std_y, nom_y + std_y, facecolor=china_regression_color, alpha=0.6)
         elif k == 1:
             ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=china_regression_color, alpha=0.2)
+                                   std_y, facecolor=china_regression_color, alpha=0.2)
         elif k == 2:
             ax_shared.fill_between(nom_x, nom_y - std_y, nom_y +
-                                     std_y, facecolor=china_regression_color, alpha=0.1)
+                                   std_y, facecolor=china_regression_color, alpha=0.1)
 
     plt.tight_layout()
 
@@ -226,7 +225,7 @@ for l in range(plot_start, entries+4):
 
     ax_pie.pie(piechart_data, colors=barchart_colors, startangle=90)
     ax_pie.axis("equal")
-    ax_pie.text(-0.8, 1.1, "infections outside China by region")
+    ax_pie.text(-1.0, 1.1, "infections outside China by region")
 
     # these objects are used to create a consistent legend
     legendel_china = Patch(facecolor=barchart_colors[0])
@@ -261,32 +260,32 @@ for l in range(plot_start, entries+4):
     piechart_legend.set_zorder(20)
 
     legendel_china_data = Line2D([0], [0], marker="s", color=china_color,
-                                lw=0, markerfacecolor=china_color, markersize=10)
+                                 lw=0, markerfacecolor=china_color, markersize=10)
     legendel_china_regression = Line2D(
         [0], [0], color=china_regression_color, lw=4)
     legendel_china_recovered = Patch(
         facecolor=china_recovered_color, alpha=0.5, hatch="//")
     legendel_spacer = Patch(facecolor="none")
     legendel_row_data = Line2D([0], [0], marker="o", color=row_color,
-                              lw=0, markerfacecolor=row_color, markersize=10)
+                               lw=0, markerfacecolor=row_color, markersize=10)
     legendel_row_regression = Line2D(
         [0], [0], color=row_regression_color, lw=4)
     legendel_row_recovered = Patch(
         facecolor=row_recovered_color, alpha=0.5, hatch="..")
 
     total_legend = ax_shared.legend([legendel_china_data,
-                                       legendel_china_regression,
-                                       legendel_china_recovered,
-                                       legendel_row_data,
-                                       legendel_row_regression,
-                                       legendel_row_recovered],
-                                      ["Infections in China",
-                                       "Adoption to an sigmoidal fit",
-                                       "Recovered cases in China",
-                                       "Infections outside China",
-                                       "Adoption to an exponential fit",
-                                       "Recovered cases outside China"],
-                                      loc='upper right')
+                                     legendel_china_regression,
+                                     legendel_china_recovered,
+                                     legendel_row_data,
+                                     legendel_row_regression,
+                                     legendel_row_recovered],
+                                    ["Infections in China",
+                                     "Adoption to an sigmoidal fit",
+                                     "Recovered cases in China",
+                                     "Infections outside China",
+                                     "Adoption to an exponential fit",
+                                     "Recovered cases outside China"],
+                                    loc='upper right')
     total_legend.get_frame().set_edgecolor("black")
     total_legend.set_zorder(20)
 
