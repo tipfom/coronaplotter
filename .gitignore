@@ -1,5 +1,6 @@
 *.avi
 *.png
 *.mp4
+*.pyc
 
 .vscode/
