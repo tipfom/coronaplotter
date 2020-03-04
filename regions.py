@@ -59,6 +59,7 @@ region_map = {
     "Andorra": EUROPEAN_REGION,
     "Portugal": EUROPEAN_REGION,
     "Latvia": EUROPEAN_REGION,
+    "Ukraine": EUROPEAN_REGION,
 
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "Indonesia": SOUTH_EAST_ASIA_REGION,
@@ -79,6 +80,7 @@ region_map = {
     "Egypt": EASTERN_MEDITERRANEAN_REGION,
     "Qatar": EASTERN_MEDITERRANEAN_REGION,
     "Saudi Arabia": EASTERN_MEDITERRANEAN_REGION,
+    "Jordan": EASTERN_MEDITERRANEAN_REGION, # ??????????????
 
     "US": REGION_OF_THE_AMERICANS,
     "Canada": REGION_OF_THE_AMERICANS,
@@ -86,6 +88,8 @@ region_map = {
     "Mexico": REGION_OF_THE_AMERICANS,
     "Ecuador": REGION_OF_THE_AMERICANS,
     "Dominican Republic": REGION_OF_THE_AMERICANS,  # ????????????
+    "Chile": REGION_OF_THE_AMERICANS, # ?????????????????
+    "Argentina": REGION_OF_THE_AMERICANS, # ????????????
 
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
