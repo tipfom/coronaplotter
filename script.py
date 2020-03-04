@@ -61,46 +61,48 @@ def china_fit_jacobian(x, a, b, c):
 def generate_fits(x, y, start, p0, function, jacobian):
     result = []
     for i in range(start, len(x)+1):
-        result.append(scipy.optimize.curve_fit(function, x[:i], y[:i], p0, jac=jacobian))
+        result.append(scipy.optimize.curve_fit(
+            function, x[:i], y[:i], p0, jac=jacobian))
     return result
 
-plot_start=11
 
-fit_data_x=np.arange(0, entries)
-china_fits=generate_fits(fit_data_x, confirmed_china, plot_start, [
-                         80000, 0.4, 20], china_fit_function, china_fit_jacobian)
-row_fits=generate_fits(fit_data_x, confirmed_row, plot_start, [
-                       5, 0.2], row_fit_function, row_fit_jacobian)
+plot_start = 11
+
+fit_data_x = np.arange(0, entries)
+china_fits = generate_fits(fit_data_x, confirmed_china, plot_start, [
+    80000, 0.4, 20], china_fit_function, china_fit_jacobian)
+row_fits = generate_fits(fit_data_x, confirmed_row, plot_start, [
+    5, 0.2], row_fit_function, row_fit_jacobian)
 
 # increase pyplot font size
-font={'family': 'sans-serif', 'weight': 'normal', 'size': 16}
+font = {'family': 'sans-serif', 'weight': 'normal', 'size': 16}
 matplotlib.rc('font', **font)
 plt.rc('axes', labelsize=20)
 
 
 # x-axis range
-xmin=0
-xmax=49
+xmin = 0
+xmax = 49
 # steps between major ticks on x-axi
-xstep=7
+xstep = 7
 
 # create animation frames
 for l in range(plot_start, entries+4):
-    current_date_index=l  # index of the last data point to be used
-    desired_fit_count=3  # number of previous fits to include
+    current_date_index = l  # index of the last data point to be used
+    desired_fit_count = 3  # number of previous fits to include
 
     if l > entries:  # used to fade out the last three plots
-        current_date_index=entries
-        desired_fit_count=3 - (l - current_date_index)+1
+        current_date_index = entries
+        desired_fit_count = 3 - (l - current_date_index)+1
 
-    data_x=np.arange(0, current_date_index)
-    china_data_y=confirmed_by_region[MAINLAND_CHINA][0:current_date_index]
+    data_x = np.arange(0, current_date_index)
+    china_data_y = confirmed_by_region[MAINLAND_CHINA][0:current_date_index]
 
-    row_data_y=(confirmed_total -
+    row_data_y = (confirmed_total -
                   confirmed_by_region[MAINLAND_CHINA])[0:current_date_index]
 
     # creation of pyplot plot
-    fig, ax_shared=plt.subplots()
+    fig, ax_shared = plt.subplots()
     ax_shared.yaxis.tick_right()
     ax_shared.yaxis.set_label_position("right")
     ax_shared.spines['left'].set_color("none")
@@ -109,9 +111,9 @@ for l in range(plot_start, entries+4):
     fig.set_figheight(10)
     fig.set_figwidth(12)
 
-    majxticks=([], [])
+    majxticks = ([], [])
     # generation of x-axis tick-names
-    startdate=datetime(2020, 1, 22)
+    startdate = datetime(2020, 1, 22)
     for j in range(xmin, xmax+1, xstep):
         majxticks[0].append(j)
         majxticks[1].append((startdate + timedelta(j)).strftime("%d. %b"))
@@ -156,20 +158,20 @@ for l in range(plot_start, entries+4):
     # create the exponential plots
     for k in range(0, np.min([desired_fit_count, current_date_index-plot_start])):
         # fit the exponential function
-        popt, pcov=row_fits[current_date_index-plot_start-k]
+        popt, pcov = row_fits[current_date_index-plot_start-k]
         # get errors from trace of covariance matrix
-        perr=np.sqrt(np.diag(pcov))
+        perr = np.sqrt(np.diag(pcov))
 
         # create uncertainty floats for error bars, 2* means 2 sigma
-        a=ufloat(popt[0], perr[0])
-        b=ufloat(popt[1], perr[1])
+        a = ufloat(popt[0], perr[0])
+        b = ufloat(popt[1], perr[1])
 
         # get the values of the uncertain fit
-        fit_x_unc=np.linspace(xmin, xmax, 300)
-        fit_y_unc=a*unp.exp(b*fit_x_unc)
-        nom_x=unp.nominal_values(fit_x_unc)
-        nom_y=unp.nominal_values(fit_y_unc)
-        std_y=unp.std_devs(fit_y_unc)
+        fit_x_unc = np.linspace(xmin, xmax, 300)
+        fit_y_unc = a*unp.exp(b*fit_x_unc)
+        nom_x = unp.nominal_values(fit_x_unc)
+        nom_y = unp.nominal_values(fit_y_unc)
+        std_y = unp.std_devs(fit_y_unc)
 
         # plot
         if k == 0:
@@ -191,21 +193,21 @@ for l in range(plot_start, entries+4):
 
     for k in range(0, np.min([desired_fit_count, current_date_index-plot_start])):
         # fit the sigmoidal function
-        popt, pcov=china_fits[current_date_index-plot_start-k]
+        popt, pcov = china_fits[current_date_index-plot_start-k]
         # get errors from trace of covariance matrix
-        perr=np.sqrt(np.diag(pcov))
+        perr = np.sqrt(np.diag(pcov))
 
         # create uncertainty floats for error bars, 2* means 2 sigma
-        a=ufloat(popt[0], perr[0])
-        b=ufloat(popt[1], perr[1])
-        c=ufloat(popt[2], perr[2])
+        a = ufloat(popt[0], perr[0])
+        b = ufloat(popt[1], perr[1])
+        c = ufloat(popt[2], perr[2])
 
         # get the values of the uncertain fit
-        fit_x_unc=np.linspace(xmin, xmax, 300)
-        fit_y_unc=a/(1+unp.exp(-b*(fit_x_unc-c)))
-        nom_x=unp.nominal_values(fit_x_unc)
-        nom_y=unp.nominal_values(fit_y_unc)
-        std_y=unp.std_devs(fit_y_unc)
+        fit_x_unc = np.linspace(xmin, xmax, 300)
+        fit_y_unc = a/(1+unp.exp(-b*(fit_x_unc-c)))
+        nom_x = unp.nominal_values(fit_x_unc)
+        nom_y = unp.nominal_values(fit_y_unc)
+        std_y = unp.std_devs(fit_y_unc)
 
         # plot
         if k == 0:
@@ -227,64 +229,72 @@ for l in range(plot_start, entries+4):
 
     plt.tight_layout()
 
-    ax_pie=plt.axes([.03, .3, .35, .9])
-
-    piechart_data=[0]
-    for i in range(1, OTHER+1):
-        reg_data=confirmed_by_region[i][current_date_index-1]
-        piechart_data.append(reg_data)
-
-    ax_pie.pie(piechart_data, colors=piechart_colors, startangle=90)
-    ax_pie.axis("equal")
-    ax_pie.text(-1.0, 1.1, "infections outside China by region")
+    ax_regional_development = plt.axes([.03, 0.6, .35, .35])
+    ax_regional_development.set_title("regional distribution")
+    regional_x = np.arange(0, 7)
+    bottom = np.zeros(7)
+    for i in range(1, REGION_COUNT):
+        regional_data = np.zeros(7)
+        for d in range(7):
+            regional_data[d] = (confirmed_by_region[i][current_date_index-d-1]
+                                ) / confirmed_row[current_date_index-d-1]
+        ax_regional_development.fill_between(regional_x, bottom,
+                                             bottom+regional_data,
+                                             color=region_colors[i], alpha=0.7)
+        bottom += regional_data
+    ax_regional_development.set_ylim([0, 1])
+    ax_regional_development.set_yticks([])
+    ax_regional_development.set_xlim([0, 6])
+    plt.xticks([0, 6], [(startdate + timedelta(current_date_index-1)
+                         ).strftime("%d. %b"), "one week ago"])
 
     # these objects are used to create a consistent legend
-    legendel_china=Patch(facecolor=piechart_colors[0])
-    legendel_westerpacificregion=Patch(facecolor=piechart_colors[1])
-    legendel_europeanregion=Patch(facecolor=piechart_colors[2])
-    legendel_southeastasiaregion=Patch(
-        facecolor=piechart_colors[3])
-    legendel_easternmediterraneanregion=Patch(
-        facecolor=piechart_colors[4])
-    legendel_regionoftheamericans=Patch(
-        facecolor=piechart_colors[5])
-    legendel_africanregion=Patch(facecolor=piechart_colors[6])
-    legendel_other=Patch(facecolor=piechart_colors[7])
+    legendel_china = Patch(facecolor=region_colors[0])
+    legendel_westerpacificregion = Patch(facecolor=region_colors[1])
+    legendel_europeanregion = Patch(facecolor=region_colors[2])
+    legendel_southeastasiaregion = Patch(
+        facecolor=region_colors[3])
+    legendel_easternmediterraneanregion = Patch(
+        facecolor=region_colors[4])
+    legendel_regionoftheamericans = Patch(
+        facecolor=region_colors[5])
+    legendel_africanregion = Patch(facecolor=region_colors[6])
+    legendel_other = Patch(facecolor=region_colors[7])
 
     # add the legend and object descriptions
-    piechart_legend=ax_pie.legend([legendel_westerpacificregion,
-                                     legendel_europeanregion,
-                                     legendel_southeastasiaregion,
-                                     legendel_easternmediterraneanregion,
-                                     legendel_regionoftheamericans,
-                                     legendel_africanregion,
-                                     legendel_other],
-                                    ["Western Pacific Region",
-                                     "European Region",
-                                     "South-East Asia Region",
-                                     "Eastern Mediterranean Region",
-                                     "Region of the Americans",
-                                     "African Region",
-                                     "Other"],
-                                    loc='lower center')
+    piechart_legend = ax_regional_development.legend([legendel_westerpacificregion,
+                                                      legendel_europeanregion,
+                                                      legendel_southeastasiaregion,
+                                                      legendel_easternmediterraneanregion,
+                                                      legendel_regionoftheamericans,
+                                                      legendel_africanregion,
+                                                      legendel_other],
+                                                     ["Western Pacific Region",
+                                                      "European Region",
+                                                      "South-East Asia Region",
+                                                      "Eastern Mediterranean Region",
+                                                      "Region of the Americans",
+                                                      "African Region",
+                                                      "Other"],
+                                                     loc='upper center', bbox_to_anchor=(0.5, -0.1))
     piechart_legend.get_frame().set_edgecolor("black")
     piechart_legend.set_zorder(20)
 
-    legendel_china_data=Line2D([0], [0], marker="s", color=china_color,
+    legendel_china_data = Line2D([0], [0], marker="s", color=china_color,
                                  lw=0, markerfacecolor=china_color, markersize=10)
-    legendel_china_regression=Line2D(
+    legendel_china_regression = Line2D(
         [0], [0], color=china_regression_color, lw=4)
-    legendel_china_recovered=Patch(
+    legendel_china_recovered = Patch(
         facecolor=china_recovered_color, alpha=0.5, hatch="//", edgecolor=china_recovered_color)
-    legendel_spacer=Patch(facecolor="none")
-    legendel_row_data=Line2D([0], [0], marker="o", color=row_color,
+    legendel_spacer = Patch(facecolor="none")
+    legendel_row_data = Line2D([0], [0], marker="o", color=row_color,
                                lw=0, markerfacecolor=row_color, markersize=10)
-    legendel_row_regression=Line2D(
+    legendel_row_regression = Line2D(
         [0], [0], color=row_regression_color, lw=4)
-    legendel_row_recovered=Patch(
+    legendel_row_recovered = Patch(
         facecolor=row_recovered_color, alpha=0.5, hatch="..", edgecolor=row_recovered_color)
 
-    total_legend=ax_shared.legend([legendel_china_data,
+    total_legend = ax_shared.legend([legendel_china_data,
                                      legendel_china_regression,
                                      legendel_china_recovered,
                                      legendel_row_data,
@@ -305,18 +315,18 @@ for l in range(plot_start, entries+4):
     plt.close()
 
 # batch the images to a video
-initial_frame_repeatcount=2  # number of times the initial frame is to be repeated
-final_frame_repeatcount=7  # number of times the final frame is to be repeated
+initial_frame_repeatcount = 2  # number of times the initial frame is to be repeated
+final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 
-video_name='video.mp4'  # name of the exported video
+video_name = 'video.mp4'  # name of the exported video
 
 # get video size data
-frame=cv2.imread("./images/" + str(plot_start) + ".png")
-height, width, layers=frame.shape
+frame = cv2.imread("./images/" + str(plot_start) + ".png")
+height, width, layers = frame.shape
 
 # create video writer
-fps=4
-video=cv2.VideoWriter(video_name, 0, fps, (width, height))
+fps = 4
+video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
 for current_date_index in range(0, initial_frame_repeatcount):

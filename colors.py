@@ -7,7 +7,7 @@ row_color = "#cc4300"  # np.array([179, 98, 18]) / 255
 row_regression_color = "#E8743B"  # np.array([255, 152, 51]) / 255
 row_recovered_color = "#0e8c62"
 
-piechart_colors = [
+region_colors = [
     china_color,  # MAINLAND_CHINA = 0
     "#BF399E",  # WESTERN_PACIFIC_REGION = 1
     "#E8743B",  # EUROPEAN_REGION = 2
