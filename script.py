@@ -245,7 +245,7 @@ for l in range(plot_start, entries+4):
     ax_regional_development.set_ylim([0, 1])
     ax_regional_development.set_yticks([])
     ax_regional_development.set_xlim([0, 6])
-    plt.xticks([0, 6], [(startdate + timedelta(current_date_index-1)
+    plt.xticks([0, 6], ["  " + (startdate + timedelta(current_date_index-1)
                          ).strftime("%d. %b"), "one week ago"])
 
     # these objects are used to create a consistent legend
