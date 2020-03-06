@@ -36,7 +36,6 @@ region_map = {
     "Sweden": EUROPEAN_REGION,
     "Austria": EUROPEAN_REGION,
     "Croatia": EUROPEAN_REGION,
-    "Israel": EUROPEAN_REGION,
     "Netherlands": EUROPEAN_REGION,
     "Azerbaijan": EUROPEAN_REGION,
     "Denmark": EUROPEAN_REGION,
@@ -60,6 +59,13 @@ region_map = {
     "Portugal": EUROPEAN_REGION,
     "Latvia": EUROPEAN_REGION,
     "Ukraine": EUROPEAN_REGION,
+    "Hungary": EUROPEAN_REGION,
+    "Gibraltar": EUROPEAN_REGION, # ????????????????
+    "Faroe Islands": EUROPEAN_REGION,
+    "Liechtenstein": EUROPEAN_REGION,
+    "Poland": EUROPEAN_REGION,
+    "Bosnia and Herzegovina": EUROPEAN_REGION,
+    "Slovenia": EUROPEAN_REGION,
 
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "Indonesia": SOUTH_EAST_ASIA_REGION,
@@ -81,7 +87,9 @@ region_map = {
     "Qatar": EASTERN_MEDITERRANEAN_REGION,
     "Saudi Arabia": EASTERN_MEDITERRANEAN_REGION,
     "Jordan": EASTERN_MEDITERRANEAN_REGION, # ??????????????
-
+    "Israel": EASTERN_MEDITERRANEAN_REGION,
+    "Palestine": EASTERN_MEDITERRANEAN_REGION,
+    
     "US": REGION_OF_THE_AMERICANS,
     "Canada": REGION_OF_THE_AMERICANS,
     "Brazil": REGION_OF_THE_AMERICANS,
@@ -90,11 +98,14 @@ region_map = {
     "Dominican Republic": REGION_OF_THE_AMERICANS,  # ????????????
     "Chile": REGION_OF_THE_AMERICANS, # ?????????????????
     "Argentina": REGION_OF_THE_AMERICANS, # ????????????
+    "Saint Barthelemy": REGION_OF_THE_AMERICANS, # ?????????????
 
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
     "Morocco": AFRICAN_REGION,
     "Senegal": AFRICAN_REGION,
+    "Tunisia": AFRICAN_REGION,
+    "South Africa": AFRICAN_REGION,
 
     "Others": OTHER,
 }
