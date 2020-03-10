@@ -159,19 +159,59 @@ for l in range(plot_start, entries + 4):
         np.zeros(current_date_index),
         recovered_by_region[MAINLAND_CHINA][:current_date_index],
         color=china_recovered_color,
-        ec=china_color,
         alpha=0.5,
         hatch="//",
     )
+    ax_shared.fill_between(
+        data_x,
+        recovered_by_region[MAINLAND_CHINA][:current_date_index],
+        recovered_by_region[MAINLAND_CHINA][:current_date_index]
+        + dead_by_region[MAINLAND_CHINA][:current_date_index],
+        color=china_dead_color,
+        alpha=0.5,
+        hatch="//",
+    )
+    ax_shared.fill_between(
+        data_x,
+        recovered_by_region[MAINLAND_CHINA][:current_date_index]
+        + dead_by_region[MAINLAND_CHINA][:current_date_index],
+        china_data_y,
+        color=china_color,
+        alpha=0.2,
+        hatch="//",
+    )
 
+    recovered_row = (
+        recovered_total[:current_date_index]
+        - recovered_by_region[MAINLAND_CHINA][:current_date_index]
+    )
+    dead_row = (
+        dead_total[:current_date_index]
+        - dead_by_region[MAINLAND_CHINA][:current_date_index]
+    )
     ax_shared.plot(data_x, row_data_y, "o", color=row_color, markersize=7, zorder=10)
     ax_shared.fill_between(
         data_x,
         np.zeros(current_date_index),
-        recovered_total[:current_date_index]
-        - recovered_by_region[MAINLAND_CHINA][:current_date_index],
+        recovered_row,
         color=row_recovered_color,
         alpha=0.5,
+        hatch="..",
+    )
+    ax_shared.fill_between(
+        data_x,
+        recovered_row,
+        recovered_row + dead_row,
+        color=row_dead_color,
+        alpha=0.5,
+        hatch="..",
+    )
+    ax_shared.fill_between(
+        data_x,
+        recovered_row + dead_row,
+        row_data_y,
+        color=row_color,
+        alpha=0.2,
         hatch="..",
     )
     # create the exponential plots
@@ -363,6 +403,12 @@ for l in range(plot_start, entries + 4):
         hatch="//",
         edgecolor=china_recovered_color,
     )
+    legendel_china_dead = Patch(
+        facecolor=china_dead_color,
+        alpha=0.5,
+        hatch="//",
+        edgecolor=china_dead_color,
+    )
     legendel_spacer = Patch(facecolor="none")
     legendel_row_data = Line2D(
         [0],
@@ -380,23 +426,32 @@ for l in range(plot_start, entries + 4):
         hatch="..",
         edgecolor=row_recovered_color,
     )
-
+    legendel_row_dead = Patch(
+        facecolor=row_dead_color,
+        alpha=0.5,
+        hatch="..",
+        edgecolor=row_dead_color,
+    )
     total_legend = ax_shared.legend(
         [
             legendel_china_data,
             legendel_china_regression,
             legendel_china_recovered,
+            legendel_china_dead,
             legendel_row_data,
             legendel_row_regression,
             legendel_row_recovered,
+            legendel_row_dead,
         ],
         [
             "Infections in China",
             "Adoption to an sigmoidal fit",
             "Recovered cases in China",
+            "COVID-19 deaths in China",
             "Infections outside China",
             "Adoption to an exponential fit",
             "Recovered cases outside China",
+            "COVID-19 deaths outside China",
         ],
         loc="upper right",
     )
