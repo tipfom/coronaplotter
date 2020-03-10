@@ -231,7 +231,7 @@ for l in range(plot_start, entries+4):
 
     ax_regional_development = plt.axes([.03, 0.6, .35, .35])
     ax_regional_development.set_title("regional distribution")
-    regional_x = np.arange(0, 7)
+    regional_x = np.arange(6,-1,-1)
     bottom = np.zeros(7)
     for i in range(1, REGION_COUNT):
         regional_data = np.zeros(7)
@@ -245,8 +245,8 @@ for l in range(plot_start, entries+4):
     ax_regional_development.set_ylim([0, 1])
     ax_regional_development.set_yticks([])
     ax_regional_development.set_xlim([0, 6])
-    plt.xticks([0, 6], ["  " + (startdate + timedelta(current_date_index-1)
-                         ).strftime("%d. %b"), "one week ago"])
+    plt.xticks([6,0], [(startdate + timedelta(current_date_index-1)
+                         ).strftime("%d. %b"), "                one week ago"])
 
     # these objects are used to create a consistent legend
     legendel_china = Patch(facecolor=region_colors[0])

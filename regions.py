@@ -72,6 +72,8 @@ region_map = {
     "Republic of Ireland": EUROPEAN_REGION,
     "Bulgaria": EUROPEAN_REGION,
     "Moldova": EUROPEAN_REGION,
+    "Albania": EUROPEAN_REGION,
+    "Cyprus": EUROPEAN_REGION,
     #####################################################################
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "Indonesia": SOUTH_EAST_ASIA_REGION,
@@ -81,6 +83,7 @@ region_map = {
     "Bhutan": SOUTH_EAST_ASIA_REGION,
     "Maldives": SOUTH_EAST_ASIA_REGION,
     "Bangladesh": SOUTH_EAST_ASIA_REGION,
+    "Brunei": SOUTH_EAST_ASIA_REGION,
     #####################################################################
     "Armenia": EASTERN_MEDITERRANEAN_REGION,  # ????????????
     "Iran": EASTERN_MEDITERRANEAN_REGION,
@@ -113,6 +116,7 @@ region_map = {
     "Colombia": REGION_OF_THE_AMERICANS,
     "Costa Rica": REGION_OF_THE_AMERICANS,
     "Paraguay": REGION_OF_THE_AMERICANS,
+    "St. Martin": REGION_OF_THE_AMERICANS,  # ??????????????
     #####################################################################
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
