@@ -66,7 +66,7 @@ def generate_fits(x, y, start, p0, function, jacobian):
     return result
 
 
-plot_start = 11
+plot_start = 15
 
 fit_data_x = np.arange(0, entries)
 china_fits = generate_fits(fit_data_x, confirmed_china, plot_start, [
@@ -82,7 +82,7 @@ plt.rc('axes', labelsize=20)
 
 # x-axis range
 xmin = 0
-xmax = 49
+xmax = 53
 # steps between major ticks on x-axi
 xstep = 7
 
