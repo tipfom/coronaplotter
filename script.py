@@ -524,7 +524,7 @@ if __name__ == '__main__':
 
     # batch the images to a video
     initial_frame_repeatcount = 2  # number of times the initial frame is to be repeated
-    final_frame_repeatcount = 7  # number of times the final frame is to be repeated
+    final_frame_repeatcount = 4  # number of times the final frame is to be repeated
 
     video_name = "video.mp4"  # name of the exported video
 
