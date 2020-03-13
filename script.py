@@ -101,7 +101,7 @@ plt.rc("axes", labelsize=20)
 
 # x-axis range
 xmin = 0
-xmax = 53
+xmax = 56
 # steps between major ticks on x-axi
 xstep = 7
 

@@ -15,12 +15,12 @@ OTHER = 12
 REGION_COUNT = OTHER + 1
 
 region_map = {
-    "Mainland China": MAINLAND_CHINA,
+    "China": MAINLAND_CHINA,
     "Hong Kong": MAINLAND_CHINA,
     "Macau": MAINLAND_CHINA,
-    "Taiwan": MAINLAND_CHINA,
+    "Taiwan*": MAINLAND_CHINA,
     #####################################################################
-    "South Korea": SOUTH_KOREA_COUNTRY,
+    "Korea, South": SOUTH_KOREA_COUNTRY,
     "Japan": WESTERN_PACIFIC_REGION,
     "Singapore": WESTERN_PACIFIC_REGION,
     "Australia": WESTERN_PACIFIC_REGION,
@@ -34,7 +34,7 @@ region_map = {
     "France": FRANCE_COUNTRY,
     "Germany": GERMANY_COUNTY,
     "Spain": EUROPEAN_REGION,
-    "UK": EUROPEAN_REGION,
+    "United Kingdom": EUROPEAN_REGION,
     "Switzerland": EUROPEAN_REGION,
     "Norway": EUROPEAN_REGION,
     "Sweden": EUROPEAN_REGION,
@@ -58,7 +58,7 @@ region_map = {
     "San Marino": EUROPEAN_REGION,
     "Luxembourg": EUROPEAN_REGION,
     "Iceland": EUROPEAN_REGION,
-    "Czech Republic": EUROPEAN_REGION,
+    "Czechia": EUROPEAN_REGION,
     "Andorra": EUROPEAN_REGION,
     "Portugal": EUROPEAN_REGION,
     "Latvia": EUROPEAN_REGION,
@@ -79,6 +79,8 @@ region_map = {
     "Moldova": EUROPEAN_REGION,
     "Albania": EUROPEAN_REGION,
     "Cyprus": EUROPEAN_REGION,
+    "Turkey": EUROPEAN_REGION, # ?????????????????????
+    "Holy See": EUROPEAN_REGION,
     #####################################################################
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "Indonesia": SOUTH_EAST_ASIA_REGION,
@@ -89,6 +91,7 @@ region_map = {
     "Maldives": SOUTH_EAST_ASIA_REGION,
     "Bangladesh": SOUTH_EAST_ASIA_REGION,
     "Brunei": SOUTH_EAST_ASIA_REGION,
+    "Mongolia": SOUTH_EAST_ASIA_REGION, # ??????????
     #####################################################################
     "Armenia": EASTERN_MEDITERRANEAN_REGION,  # ????????????
     "Iran": IRAN_COUNTRY,
@@ -122,6 +125,12 @@ region_map = {
     "Costa Rica": REGION_OF_THE_AMERICANS,
     "Paraguay": REGION_OF_THE_AMERICANS,
     "St. Martin": REGION_OF_THE_AMERICANS,  # ??????????????
+    "Honduras": REGION_OF_THE_AMERICANS,
+    "Jamaica": REGION_OF_THE_AMERICANS,
+    "Cuba": REGION_OF_THE_AMERICANS,
+    "Guyana": REGION_OF_THE_AMERICANS,
+    "Panama": REGION_OF_THE_AMERICANS,
+    "Bolivia": REGION_OF_THE_AMERICANS,
     #####################################################################
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
@@ -132,8 +141,13 @@ region_map = {
     "Togo": AFRICAN_REGION,
     "French Guiana": AFRICAN_REGION,
     "Cameroon": AFRICAN_REGION,
+    "Congo (Kinshasa)": AFRICAN_REGION,
+    "Cote d'Ivoire": AFRICAN_REGION,
+    "Burkina Faso": AFRICAN_REGION,
+    "Reunion": AFRICAN_REGION,
     #####################################################################
     "Others": OTHER,
+    "Cruise Ship": OTHER,
 }
 
 region_names = {
