@@ -5,7 +5,12 @@ SOUTH_EAST_ASIA_REGION = 3
 EASTERN_MEDITERRANEAN_REGION = 4
 REGION_OF_THE_AMERICANS = 5
 AFRICAN_REGION = 6
-OTHER = 7
+SOUTH_KOREA_COUNTRY = 7
+ITALY_COUNTRY = 8
+IRAN_COUNTRY = 9
+FRANCE_COUNTRY = 10
+GERMANY_COUNTY = 11
+OTHER = 12
 
 REGION_COUNT = OTHER + 1
 
@@ -15,7 +20,7 @@ region_map = {
     "Macau": MAINLAND_CHINA,
     "Taiwan": MAINLAND_CHINA,
     #####################################################################
-    "South Korea": WESTERN_PACIFIC_REGION,
+    "South Korea": SOUTH_KOREA_COUNTRY,
     "Japan": WESTERN_PACIFIC_REGION,
     "Singapore": WESTERN_PACIFIC_REGION,
     "Australia": WESTERN_PACIFIC_REGION,
@@ -25,9 +30,9 @@ region_map = {
     "Cambodia": WESTERN_PACIFIC_REGION,
     "New Zealand": WESTERN_PACIFIC_REGION,
     #####################################################################
-    "Italy": EUROPEAN_REGION,
-    "France": EUROPEAN_REGION,
-    "Germany": EUROPEAN_REGION,
+    "Italy": ITALY_COUNTRY,
+    "France": FRANCE_COUNTRY,
+    "Germany": GERMANY_COUNTY,
     "Spain": EUROPEAN_REGION,
     "UK": EUROPEAN_REGION,
     "Switzerland": EUROPEAN_REGION,
@@ -86,7 +91,7 @@ region_map = {
     "Brunei": SOUTH_EAST_ASIA_REGION,
     #####################################################################
     "Armenia": EASTERN_MEDITERRANEAN_REGION,  # ????????????
-    "Iran": EASTERN_MEDITERRANEAN_REGION,
+    "Iran": IRAN_COUNTRY,
     "Kuwait": EASTERN_MEDITERRANEAN_REGION,
     "Bahrain": EASTERN_MEDITERRANEAN_REGION,
     "United Arab Emirates": EASTERN_MEDITERRANEAN_REGION,
@@ -140,4 +145,9 @@ region_names = {
     REGION_OF_THE_AMERICANS: "America",
     AFRICAN_REGION: "Africa",
     OTHER: "Other",
+    SOUTH_KOREA_COUNTRY: "South Korea",
+    ITALY_COUNTRY: "Italy",
+    IRAN_COUNTRY: "Iran",
+    FRANCE_COUNTRY: "France",
+    GERMANY_COUNTY: "Germany",
 }

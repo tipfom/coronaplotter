@@ -15,7 +15,7 @@ def get_data_from_file(filename):
     total = np.array([])
 
     for i in range(4, len(data_raw[0])):
-        column_by_region = np.zeros(8)
+        column_by_region = np.zeros(REGION_COUNT)
 
         for j in range(1, len(data_raw)):
             country = data_raw[j][1]
