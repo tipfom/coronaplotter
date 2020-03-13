@@ -36,6 +36,7 @@ confirmed_china = confirmed_by_region[MAINLAND_CHINA]
 recovered_row = confirmed_total - recovered_china
 confirmed_row = confirmed_total - confirmed_china
 
+region = 2
 
 def row_fit_function(x, a, b):
     return a * np.exp(b * x)
@@ -95,6 +96,32 @@ xmax = 53
 # steps between major ticks on x-axi
 xstep = 7
 
+def get_yaxis_lim_ticks_labels(max_value):
+    max_value = max_value * 1.05
+    if max_value > 50000:
+        return ([0, 80000], [0, 2e4, 4e4, 6e4, 8e4], ["0", "20k", "40k", "60k", "80k"])
+    if max_value > 20000:
+        return ([0, 50000], [0, 1e4, 2e4, 3e4, 4e4, 5e4], ["0", "10k", "20k", "30k", "40k", "50k"])
+    if max_value > 10000:
+        return ([0, 20000], [0, 0.5e4, 1e4, 1.5e4, 2e4], ["0", "5k", "10k", "15k", "20k" ])
+    if max_value > 5000:
+        return ([0, 10000], [0, 2e3, 4e3, 6e3, 8e3, 10e3], ["0", "2k", "4k", "6k", "8k", "10k" ])
+    if max_value > 2000:
+        return ([0, 5000], [0, 1e3, 2e3, 3e3, 4e3, 5e3], ["0", "1k", "2k", "3k", "4k", "5k" ])
+    if max_value > 1000:
+        return ([0, 2000], [0, 500, 1000, 1500, 2000], ["0", "0.5k", "1k", "1.5k", "2k" ])
+    if max_value > 500:
+        return ([0, 1000], [0, 200, 400, 600, 800, 1000], ["0", "200", "400", "600", "800", "1000" ])
+    if max_value > 200:
+        return ([0, 500], [0, 100, 200, 300, 400, 500], ["0", "100", "200", "300", "400", "500" ])
+    if max_value > 100:
+        return ([0, 200], [0, 40, 80, 120, 160, 200], ["0", "40", "80", "120", "160", "200" ])
+    if max_value > 50:
+        return ([0, 100], [0, 20, 40, 60, 80, 100], ["0", "20", "40", "60", "80", "100" ])
+    if max_value > 10:
+        return ([0, 50], [0, 10, 20, 30, 40, 50], ["0", "10", "20", "30", "40", "50" ])
+    return ([0, 10], [0, 2, 4, 6, 8, 10], ["0", "2", "4", "6", "8", "10" ])
+
 # create animation frames
 for l in range(plot_start, entries + 4):
     current_date_index = l  # index of the last data point to be used
@@ -112,13 +139,16 @@ for l in range(plot_start, entries + 4):
     ]
 
     # creation of pyplot plot
-    fig, ax_shared = plt.subplots()
+    fig, (ax_regional_development, ax_shared) = plt.subplots(2)
     ax_shared.yaxis.tick_right()
     ax_shared.yaxis.set_label_position("right")
     ax_shared.spines["left"].set_color("none")
+    ax_regional_development.yaxis.tick_right()
+    ax_regional_development.yaxis.set_label_position("right")
+    ax_regional_development.spines["left"].set_color("none")
 
     # setting the dimensions (basically resolution with 12by9 aspect ratio)
-    fig.set_figheight(10)
+    fig.set_figheight(12)
     fig.set_figwidth(12)
 
     majxticks = ([], [])
@@ -130,18 +160,30 @@ for l in range(plot_start, entries + 4):
 
     # setting the x-axis ticks
     ax_shared.set_xlim([xmin, xmax])
-    plt.xticks(majxticks[0], majxticks[1])
+    ax_shared.set_xticks(majxticks[0])
+    ax_shared.set_xticklabels(majxticks[1])
     ax_shared.xaxis.set_minor_locator(MultipleLocator(1))
-    ax_shared.tick_params(axis="x", which="major", length=8, width=1.5)
-    ax_shared.tick_params(axis="x", which="minor", length=5, width=1)
+
+    #ax_regional_development.set_ylim([0, 1])
+    ax_regional_development.set_xlim([xmin, xmax])
+    ax_regional_development.set_xticks(majxticks[0])
+    ax_regional_development.set_xticklabels(majxticks[1])
+    ax_regional_development.xaxis.set_minor_locator(MultipleLocator(1))
 
     # setting the y-axis ticks
     ax_shared.set_yticks([0, 2e4, 4e4, 6e4, 8e4, 10e4, 12e4])
     ax_shared.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k", "120k"])
     ax_shared.yaxis.set_minor_locator(MultipleLocator(10000))
 
+    regional_lim_ticks_labels = get_yaxis_lim_ticks_labels(confirmed_by_region[region][current_date_index])
+    ax_regional_development.set_ylim(regional_lim_ticks_labels[0])
+    ax_regional_development.set_yticks(regional_lim_ticks_labels[1])
+    ax_regional_development.set_yticklabels(regional_lim_ticks_labels[2])
+    ax_regional_development.yaxis.set_minor_locator(MultipleLocator(regional_lim_ticks_labels[1][1]/2))
+
+
     # setting the y-axis limit
-    ax_shared.set_ylim([0, 130000])
+    ax_shared.set_ylim([0, 100000])
 
     # label axis
     plt.xlabel("date")
@@ -149,6 +191,7 @@ for l in range(plot_start, entries + 4):
 
     # format the border of the diagram
     ax_shared.spines["top"].set_color("white")
+    ax_regional_development.spines["top"].set_color("white")
 
     # plot the original data
     ax_shared.plot(
@@ -322,33 +365,12 @@ for l in range(plot_start, entries + 4):
 
     plt.tight_layout()
 
-    ax_regional_development = plt.axes([0.03, 0.6, 0.35, 0.35])
-    ax_regional_development.set_title("regional distribution")
-    regional_x = np.arange(6, -1, -1)
-    bottom = np.zeros(7)
-    for i in range(1, REGION_COUNT):
-        regional_data = np.zeros(7)
-        for d in range(7):
-            regional_data[d] = (
-                confirmed_by_region[i][current_date_index - d - 1]
-            ) / confirmed_row[current_date_index - d - 1]
-        ax_regional_development.fill_between(
-            regional_x,
-            bottom,
-            bottom + regional_data,
-            color=region_colors[i],
-            alpha=0.7,
-        )
-        bottom += regional_data
-    ax_regional_development.set_ylim([0, 1])
-    ax_regional_development.set_yticks([])
-    ax_regional_development.set_xlim([0, 6])
-    plt.xticks(
-        [6, 0],
-        [
-            (startdate + timedelta(current_date_index - 1)).strftime("%d. %b"),
-            "                one week ago",
-        ],
+    ax_regional_development.set_title("regional development in " + region_names[region]) 
+    ax_regional_development.plot(
+        data_x,
+        confirmed_by_region[region][:current_date_index],
+        color=region_colors[region],
+        alpha=0.7,
     )
 
     # these objects are used to create a consistent legend
@@ -381,8 +403,7 @@ for l in range(plot_start, entries + 4):
             "African Region",
             "Other",
         ],
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.1),
+        loc="upper left",
     )
     piechart_legend.get_frame().set_edgecolor("black")
     piechart_legend.set_zorder(20)
@@ -453,12 +474,13 @@ for l in range(plot_start, entries + 4):
             "Recovered cases outside China",
             "COVID-19 deaths outside China",
         ],
-        loc="upper right",
+        loc="upper left",
     )
     total_legend.get_frame().set_edgecolor("black")
     total_legend.set_zorder(20)
 
     # save the plot in the current folder
+    plt.tight_layout()
     plt.savefig("./images/" + str(l) + ".png")
     plt.close()
 

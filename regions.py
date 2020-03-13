@@ -130,3 +130,14 @@ region_map = {
     #####################################################################
     "Others": OTHER,
 }
+
+region_names = {
+    MAINLAND_CHINA: "China",
+    WESTERN_PACIFIC_REGION: "Western Pacific Countries",
+    EUROPEAN_REGION: "Europe",
+    SOUTH_EAST_ASIA_REGION: "South East Asia",
+    EASTERN_MEDITERRANEAN_REGION: "Eastern Mediteranian Countries",
+    REGION_OF_THE_AMERICANS: "America",
+    AFRICAN_REGION: "Africa",
+    OTHER: "Other",
+}
