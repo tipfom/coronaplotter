@@ -38,6 +38,16 @@ confirmed_row = confirmed_total - confirmed_china
 
 region = 2
 
+new_cases_by_region = []
+for confirmed_cases in confirmed_by_region:
+    new_cases_by_region.append(
+        np.append(
+            [confirmed_cases[0]],
+            np.array(confirmed_cases[1:]) - np.array(confirmed_cases[:-1]),
+        )
+    )
+
+
 def row_fit_function(x, a, b):
     return a * np.exp(b * x)
 
@@ -96,31 +106,69 @@ xmax = 53
 # steps between major ticks on x-axi
 xstep = 7
 
+
 def get_yaxis_lim_ticks_labels(max_value):
     max_value = max_value * 1.05
     if max_value > 50000:
         return ([0, 80000], [0, 2e4, 4e4, 6e4, 8e4], ["0", "20k", "40k", "60k", "80k"])
     if max_value > 20000:
-        return ([0, 50000], [0, 1e4, 2e4, 3e4, 4e4, 5e4], ["0", "10k", "20k", "30k", "40k", "50k"])
+        return (
+            [0, 50000],
+            [0, 1e4, 2e4, 3e4, 4e4, 5e4],
+            ["0", "10k", "20k", "30k", "40k", "50k"],
+        )
     if max_value > 10000:
-        return ([0, 20000], [0, 0.5e4, 1e4, 1.5e4, 2e4], ["0", "5k", "10k", "15k", "20k" ])
+        return (
+            [0, 20000],
+            [0, 0.5e4, 1e4, 1.5e4, 2e4],
+            ["0", "5k", "10k", "15k", "20k"],
+        )
     if max_value > 5000:
-        return ([0, 10000], [0, 2e3, 4e3, 6e3, 8e3, 10e3], ["0", "2k", "4k", "6k", "8k", "10k" ])
+        return (
+            [0, 10000],
+            [0, 2e3, 4e3, 6e3, 8e3, 10e3],
+            ["0", "2k", "4k", "6k", "8k", "10k"],
+        )
     if max_value > 2000:
-        return ([0, 5000], [0, 1e3, 2e3, 3e3, 4e3, 5e3], ["0", "1k", "2k", "3k", "4k", "5k" ])
+        return (
+            [0, 5000],
+            [0, 1e3, 2e3, 3e3, 4e3, 5e3],
+            ["0", "1k", "2k", "3k", "4k", "5k"],
+        )
     if max_value > 1000:
-        return ([0, 2000], [0, 500, 1000, 1500, 2000], ["0", "0.5k", "1k", "1.5k", "2k" ])
+        return (
+            [0, 2000],
+            [0, 500, 1000, 1500, 2000],
+            ["0", "0.5k", "1k", "1.5k", "2k"],
+        )
     if max_value > 500:
-        return ([0, 1000], [0, 200, 400, 600, 800, 1000], ["0", "200", "400", "600", "800", "1000" ])
+        return (
+            [0, 1000],
+            [0, 200, 400, 600, 800, 1000],
+            ["0", "200", "400", "600", "800", "1000"],
+        )
     if max_value > 200:
-        return ([0, 500], [0, 100, 200, 300, 400, 500], ["0", "100", "200", "300", "400", "500" ])
+        return (
+            [0, 500],
+            [0, 100, 200, 300, 400, 500],
+            ["0", "100", "200", "300", "400", "500"],
+        )
     if max_value > 100:
-        return ([0, 200], [0, 40, 80, 120, 160, 200], ["0", "40", "80", "120", "160", "200" ])
+        return (
+            [0, 200],
+            [0, 40, 80, 120, 160, 200],
+            ["0", "40", "80", "120", "160", "200"],
+        )
     if max_value > 50:
-        return ([0, 100], [0, 20, 40, 60, 80, 100], ["0", "20", "40", "60", "80", "100" ])
+        return (
+            [0, 100],
+            [0, 20, 40, 60, 80, 100],
+            ["0", "20", "40", "60", "80", "100"],
+        )
     if max_value > 10:
-        return ([0, 50], [0, 10, 20, 30, 40, 50], ["0", "10", "20", "30", "40", "50" ])
-    return ([0, 10], [0, 2, 4, 6, 8, 10], ["0", "2", "4", "6", "8", "10" ])
+        return ([0, 50], [0, 10, 20, 30, 40, 50], ["0", "10", "20", "30", "40", "50"])
+    return ([0, 10], [0, 2, 4, 6, 8, 10], ["0", "2", "4", "6", "8", "10"])
+
 
 # create animation frames
 for l in range(plot_start, entries + 4):
@@ -164,7 +212,7 @@ for l in range(plot_start, entries + 4):
     ax_shared.set_xticklabels(majxticks[1])
     ax_shared.xaxis.set_minor_locator(MultipleLocator(1))
 
-    #ax_regional_development.set_ylim([0, 1])
+    # ax_regional_development.set_ylim([0, 1])
     ax_regional_development.set_xlim([xmin, xmax])
     ax_regional_development.set_xticks(majxticks[0])
     ax_regional_development.set_xticklabels(majxticks[1])
@@ -175,12 +223,15 @@ for l in range(plot_start, entries + 4):
     ax_shared.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k", "120k"])
     ax_shared.yaxis.set_minor_locator(MultipleLocator(10000))
 
-    regional_lim_ticks_labels = get_yaxis_lim_ticks_labels(confirmed_by_region[region][current_date_index])
+    regional_lim_ticks_labels = get_yaxis_lim_ticks_labels(
+        confirmed_by_region[region][current_date_index-1]
+    )
     ax_regional_development.set_ylim(regional_lim_ticks_labels[0])
     ax_regional_development.set_yticks(regional_lim_ticks_labels[1])
     ax_regional_development.set_yticklabels(regional_lim_ticks_labels[2])
-    ax_regional_development.yaxis.set_minor_locator(MultipleLocator(regional_lim_ticks_labels[1][1]/2))
-
+    ax_regional_development.yaxis.set_minor_locator(
+        MultipleLocator(regional_lim_ticks_labels[1][1] / 2)
+    )
 
     # setting the y-axis limit
     ax_shared.set_ylim([0, 100000])
@@ -188,6 +239,7 @@ for l in range(plot_start, entries + 4):
     # label axis
     plt.xlabel("date")
     ax_shared.set_ylabel("total # of confirmed infections")
+    ax_regional_development.set_ylabel("total # of confirmed infections")
 
     # format the border of the diagram
     ax_shared.spines["top"].set_color("white")
@@ -365,44 +417,27 @@ for l in range(plot_start, entries + 4):
 
     plt.tight_layout()
 
-    ax_regional_development.set_title("regional development in " + region_names[region]) 
+    ax_regional_development.set_title("regional development in " + region_names[region])
     ax_regional_development.plot(
         data_x,
         confirmed_by_region[region][:current_date_index],
-        color=region_colors[region],
-        alpha=0.7,
+        color=regional_total_color,
+        lw=4,
+    )
+    ax_regional_development.bar(
+        data_x,
+        new_cases_by_region[region][:current_date_index],
+        color=regional_change_color,
     )
 
     # these objects are used to create a consistent legend
-    legendel_china = Patch(facecolor=region_colors[0])
-    legendel_westerpacificregion = Patch(facecolor=region_colors[1])
-    legendel_europeanregion = Patch(facecolor=region_colors[2])
-    legendel_southeastasiaregion = Patch(facecolor=region_colors[3])
-    legendel_easternmediterraneanregion = Patch(facecolor=region_colors[4])
-    legendel_regionoftheamericans = Patch(facecolor=region_colors[5])
-    legendel_africanregion = Patch(facecolor=region_colors[6])
-    legendel_other = Patch(facecolor=region_colors[7])
+    legendel_regional_total = Line2D([0], [0], color=regional_total_color, lw=4)
+    legendel_regional_change = Patch(facecolor=regional_change_color)
 
     # add the legend and object descriptions
     piechart_legend = ax_regional_development.legend(
-        [
-            legendel_westerpacificregion,
-            legendel_europeanregion,
-            legendel_southeastasiaregion,
-            legendel_easternmediterraneanregion,
-            legendel_regionoftheamericans,
-            legendel_africanregion,
-            legendel_other,
-        ],
-        [
-            "Western Pacific Region",
-            "European Region",
-            "South-East Asia Region",
-            "Eastern Mediterranean Region",
-            "Region of the Americans",
-            "African Region",
-            "Other",
-        ],
+        [legendel_regional_total, legendel_regional_change,],
+        ["Total cases", "New cases",],
         loc="upper left",
     )
     piechart_legend.get_frame().set_edgecolor("black")
@@ -425,10 +460,7 @@ for l in range(plot_start, entries + 4):
         edgecolor=china_recovered_color,
     )
     legendel_china_dead = Patch(
-        facecolor=china_dead_color,
-        alpha=0.5,
-        hatch="//",
-        edgecolor=china_dead_color,
+        facecolor=china_dead_color, alpha=0.5, hatch="//", edgecolor=china_dead_color,
     )
     legendel_spacer = Patch(facecolor="none")
     legendel_row_data = Line2D(
@@ -448,10 +480,7 @@ for l in range(plot_start, entries + 4):
         edgecolor=row_recovered_color,
     )
     legendel_row_dead = Patch(
-        facecolor=row_dead_color,
-        alpha=0.5,
-        hatch="..",
-        edgecolor=row_dead_color,
+        facecolor=row_dead_color, alpha=0.5, hatch="..", edgecolor=row_dead_color,
     )
     total_legend = ax_shared.legend(
         [
@@ -481,7 +510,7 @@ for l in range(plot_start, entries + 4):
 
     # save the plot in the current folder
     plt.tight_layout()
-    plt.savefig("./images/" + str(l) + ".png")
+    plt.savefig(f"./images/{region}_{l}.png")
     plt.close()
 
 # batch the images to a video
@@ -491,7 +520,7 @@ final_frame_repeatcount = 7  # number of times the final frame is to be repeated
 video_name = "video.mp4"  # name of the exported video
 
 # get video size data
-frame = cv2.imread("./images/" + str(plot_start) + ".png")
+frame = cv2.imread(f"./images/{region}_{plot_start}.png")
 height, width, layers = frame.shape
 
 # create video writer
@@ -500,15 +529,15 @@ video = cv2.VideoWriter(video_name, 0, fps, (width, height))
 
 # write initial frame
 for current_date_index in range(0, initial_frame_repeatcount):
-    video.write(cv2.imread("./images/" + str(plot_start) + ".png"))
+    video.write(cv2.imread(f"./images{region}_{plot_start}.png"))
 
 # animation frames
 for current_date_index in range(plot_start + 1, entries + 3):
-    video.write(cv2.imread("./images/" + str(current_date_index) + ".png"))
+    video.write(cv2.imread(f"./images/{region}_{current_date_index}.png"))
 
 # write final frame repeatedly
 for current_date_index in range(0, final_frame_repeatcount):
-    video.write(cv2.imread("./images/" + str(entries + 3) + ".png"))
+    video.write(cv2.imread(f"./images/{entries+3}_{plot_start}.png"))
 
 # save video
 cv2.destroyAllWindows()

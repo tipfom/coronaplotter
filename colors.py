@@ -19,3 +19,6 @@ region_colors = [
     "#13A4B4",  # AFRICAN_REGION = 6
     "#6C8893",  # OTHER = 7
 ]
+
+regional_total_color = "#BF399E"
+regional_change_color = "#13A4B4"
