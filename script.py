@@ -47,12 +47,24 @@ for confirmed_cases in confirmed_by_region:
     )
 
 
-def row_fit_function(x, a, b):
-    return a * np.exp(b * x)
+def get_row_fit_function(x, b):
+    def row_fit_function(x, a, c):
+        return a / (1 + np.exp(-b * (x - c)))
+
+    return row_fit_function
 
 
-def row_fit_jacobian(x, a, b):
-    return np.transpose([np.exp(b * x), a * x * np.exp(b * x)])
+def get_row_fit_jacobian(x, b):
+    def row_fit_jacobian(x, a, c):
+        return np.transpose(
+            [
+                1 / (1 + np.exp(-b * (x - c))),
+                -a / ((1 + np.exp(-b * (x - c))) ** 2) * (c - x) * np.exp(-b * (x - c)),
+                -a / ((1 + np.exp(-b * (x - c))) ** 2) * b * np.exp(-b * (x - c)),
+            ]
+        )
+
+    return row_fit_jacobian
 
 
 def china_fit_function(x, a, b, c):
@@ -88,9 +100,6 @@ china_fits = generate_fits(
     [80000, 0.4, 20],
     china_fit_function,
     china_fit_jacobian,
-)
-row_fits = generate_fits(
-    fit_data_x, confirmed_row, plot_start, [5, 0.2], row_fit_function, row_fit_jacobian
 )
 
 # increase pyplot font size
@@ -224,7 +233,7 @@ def create_animation_frames(region):
         ax_shared.yaxis.set_minor_locator(MultipleLocator(10000))
 
         regional_lim_ticks_labels = get_yaxis_lim_ticks_labels(
-            confirmed_by_region[region][current_date_index-1]
+            confirmed_by_region[region][current_date_index - 1]
         )
         ax_regional_development.set_ylim(regional_lim_ticks_labels[0])
         ax_regional_development.set_yticks(regional_lim_ticks_labels[1])
@@ -284,7 +293,9 @@ def create_animation_frames(region):
             dead_total[:current_date_index]
             - dead_by_region[MAINLAND_CHINA][:current_date_index]
         )
-        ax_shared.plot(data_x, row_data_y, "o", color=row_color, markersize=7, zorder=10)
+        ax_shared.plot(
+            data_x, row_data_y, "o", color=row_color, markersize=7, zorder=10
+        )
         ax_shared.fill_between(
             data_x,
             np.zeros(current_date_index),
@@ -309,10 +320,19 @@ def create_animation_frames(region):
             alpha=0.2,
             hatch="..",
         )
-        # create the exponential plots
-        for k in range(0, np.min([desired_fit_count, current_date_index - plot_start])):
+
+        i = current_date_index - plot_start - k
+
+        for k in range(
+            0, np.min([desired_fit_count, current_date_index - plot_start + 1])
+        ):
             # fit the exponential function
-            popt, pcov = row_fits[current_date_index - plot_start - k]
+            popt, pcov = scipy.optimize.curve_fit(
+                get_row_fit_function(china_fits[i][0][2]),
+                data_x[:i],
+                confirmed_by_region[region][:i],
+                jac=get_row_fit_jacobian(china_fits[i][0][2]),
+            )
             # get errors from trace of covariance matrix
             perr = np.sqrt(np.diag(pcov))
 
@@ -364,7 +384,7 @@ def create_animation_frames(region):
 
         for k in range(0, np.min([desired_fit_count, current_date_index - plot_start])):
             # fit the sigmoidal function
-            popt, pcov = china_fits[current_date_index - plot_start - k]
+            popt, pcov = china_fits[i]
             # get errors from trace of covariance matrix
             perr = np.sqrt(np.diag(pcov))
 
@@ -417,7 +437,9 @@ def create_animation_frames(region):
 
         plt.tight_layout()
 
-        ax_regional_development.set_title("regional development in " + region_names[region])
+        ax_regional_development.set_title(
+            "regional development in " + region_names[region]
+        )
         ax_regional_development.plot(
             data_x,
             confirmed_by_region[region][:current_date_index],
@@ -460,7 +482,10 @@ def create_animation_frames(region):
             edgecolor=china_recovered_color,
         )
         legendel_china_dead = Patch(
-            facecolor=china_dead_color, alpha=0.5, hatch="//", edgecolor=china_dead_color,
+            facecolor=china_dead_color,
+            alpha=0.5,
+            hatch="//",
+            edgecolor=china_dead_color,
         )
         legendel_spacer = Patch(facecolor="none")
         legendel_row_data = Line2D(
@@ -515,11 +540,15 @@ def create_animation_frames(region):
         time.sleep(0.1)
         plt.close()
 
-if __name__ == '__main__':    
+
+if __name__ == "__main__":
     import concurrent.futures
 
-    executor = concurrent.futures.ProcessPoolExecutor(6)
-    futures = [executor.submit(create_animation_frames, item) for item in range(1, REGION_COUNT)]
+    executor = concurrent.futures.ProcessPoolExecutor(1)
+    futures = [
+        executor.submit(create_animation_frames, item)
+        for item in range(1, REGION_COUNT)
+    ]
     concurrent.futures.wait(futures)
 
     # batch the images to a video
