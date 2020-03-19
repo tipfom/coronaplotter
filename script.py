@@ -47,23 +47,20 @@ for confirmed_cases in confirmed_by_region:
     )
 
 
-def get_row_fit_function(x, b):
+def get_row_fit_function(b):
     def row_fit_function(x, a, c):
         return a / (1 + np.exp(-b * (x - c)))
-
     return row_fit_function
 
 
-def get_row_fit_jacobian(x, b):
+def get_row_fit_jacobian(b):
     def row_fit_jacobian(x, a, c):
         return np.transpose(
             [
                 1 / (1 + np.exp(-b * (x - c))),
-                -a / ((1 + np.exp(-b * (x - c))) ** 2) * (c - x) * np.exp(-b * (x - c)),
                 -a / ((1 + np.exp(-b * (x - c))) ** 2) * b * np.exp(-b * (x - c)),
             ]
         )
-
     return row_fit_jacobian
 
 
@@ -321,28 +318,38 @@ def create_animation_frames(region):
             hatch="..",
         )
 
-        i = current_date_index - plot_start - k
+        i = current_date_index - plot_start
 
-        for k in range(
-            0, np.min([desired_fit_count, current_date_index - plot_start + 1])
-        ):
+        for k in range(0, np.min([desired_fit_count, current_date_index - plot_start])):
+            b = china_fits[i - k][0][1]
             # fit the exponential function
-            popt, pcov = scipy.optimize.curve_fit(
-                get_row_fit_function(china_fits[i][0][2]),
-                data_x[:i],
-                confirmed_by_region[region][:i],
-                jac=get_row_fit_jacobian(china_fits[i][0][2]),
-            )
+            func = get_row_fit_function(b)
+            jac = get_row_fit_jacobian(b)
+            try:
+                popt, pcov = scipy.optimize.curve_fit(
+                    func,
+                    data_x[: current_date_index - k],
+                    confirmed_by_region[region][: current_date_index - k],
+                    p0=[1000000, 20],
+                    jac=jac,
+                    maxfev = 10000
+                )
+            except Exception as e:
+                print(e)
+                print(i)
+                print(k)
+                print(i-k)
+
             # get errors from trace of covariance matrix
             perr = np.sqrt(np.diag(pcov))
 
             # create uncertainty floats for error bars, 2* means 2 sigma
             a = ufloat(popt[0], perr[0])
-            b = ufloat(popt[1], perr[1])
+            c = ufloat(popt[1], perr[1])
 
             # get the values of the uncertain fit
             fit_x_unc = np.linspace(xmin, xmax, 300)
-            fit_y_unc = a * unp.exp(b * fit_x_unc)
+            fit_y_unc = a / (1 + unp.exp(-b * (fit_x_unc - c)))
             nom_x = unp.nominal_values(fit_x_unc)
             nom_y = unp.nominal_values(fit_y_unc)
             std_y = unp.std_devs(fit_y_unc)
@@ -357,8 +364,8 @@ def create_animation_frames(region):
                 print("a = " + str(a))
                 print("b = " + str(b))
 
-                ax_shared.plot(nom_x, nom_y, color=row_regression_color, linewidth=3)
-                ax_shared.fill_between(
+                ax_regional_development.plot(nom_x, nom_y, color=row_regression_color, linewidth=3)
+                ax_regional_development.fill_between(
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
@@ -366,7 +373,7 @@ def create_animation_frames(region):
                     alpha=0.5,
                 )
             elif k == 1:
-                ax_shared.fill_between(
+                ax_regional_development.fill_between(
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
@@ -374,7 +381,7 @@ def create_animation_frames(region):
                     alpha=0.2,
                 )
             elif k == 2:
-                ax_shared.fill_between(
+                ax_regional_development.fill_between(
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
@@ -384,7 +391,7 @@ def create_animation_frames(region):
 
         for k in range(0, np.min([desired_fit_count, current_date_index - plot_start])):
             # fit the sigmoidal function
-            popt, pcov = china_fits[i]
+            popt, pcov = china_fits[i - k]
             # get errors from trace of covariance matrix
             perr = np.sqrt(np.diag(pcov))
 
@@ -544,7 +551,7 @@ def create_animation_frames(region):
 if __name__ == "__main__":
     import concurrent.futures
 
-    executor = concurrent.futures.ProcessPoolExecutor(1)
+    executor = concurrent.futures.ProcessPoolExecutor(6)
     futures = [
         executor.submit(create_animation_frames, item)
         for item in range(1, REGION_COUNT)
