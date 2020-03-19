@@ -23,6 +23,8 @@ def get_data_from_file(filename):
                 region = region_map[country]
                 if(data_raw[j][i] != ""):
                     column_by_region[region] += int(data_raw[j][i])
+                    if country_map.__contains__(country):
+                        column_by_region[country_map[country]] += int(data_raw[j][i])
             else:
                 print("could not find region for " + country)
 
