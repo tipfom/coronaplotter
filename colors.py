@@ -11,4 +11,4 @@ row_dead_color = "black"
 
 regional_total_color = "#BF399E"
 regional_change_color = "#13A4B4"
-regional_regression_color = "#BF399E"
+regional_regression_color = "#945ECF"

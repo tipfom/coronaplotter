@@ -401,14 +401,19 @@ def create_animation_frames(region):
                 print("b = " + str(b))
 
                 ax_regional_development.plot(
-                    nom_x, nom_y, color=regional_regression_color, linewidth=3
+                    nom_x,
+                    nom_y,
+                    color=regional_regression_color,
+                    linewidth=3,
+                    linestyle=":",
+                    alpha=0.7,
                 )
                 ax_regional_development.fill_between(
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
                     facecolor=regional_regression_color,
-                    alpha=0.5,
+                    alpha=0.3,
                 )
             elif k == 1:
                 ax_regional_development.fill_between(
@@ -416,7 +421,7 @@ def create_animation_frames(region):
                     nom_y - std_y,
                     nom_y + std_y,
                     facecolor=regional_regression_color,
-                    alpha=0.2,
+                    alpha=0.1,
                 )
             elif k == 2:
                 ax_regional_development.fill_between(
@@ -557,11 +562,19 @@ def create_animation_frames(region):
         # these objects are used to create a consistent legend
         legendel_regional_total = Line2D([0], [0], color=regional_total_color, lw=4)
         legendel_regional_change = Patch(facecolor=regional_change_color)
+        legendel_regional_fit = Line2D(
+            [0],
+            [0],
+            color=regional_regression_color,
+            linewidth=3,
+            linestyle=":",
+            alpha=0.7,
+        )
 
         # add the legend and object descriptions
         piechart_legend = ax_regional_development.legend(
-            [legendel_regional_total, legendel_regional_change,],
-            ["Total cases", "New cases",],
+            [legendel_regional_total, legendel_regional_change,legendel_regional_fit],
+            ["Total cases", "New cases","Fit assuming the same\ngrowth as in China"],
             loc="upper left",
         )
         piechart_legend.get_frame().set_edgecolor("black")
