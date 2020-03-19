@@ -79,8 +79,11 @@ region_map = {
     "Moldova": EUROPEAN_REGION,
     "Albania": EUROPEAN_REGION,
     "Cyprus": EUROPEAN_REGION,
-    "Turkey": EUROPEAN_REGION, # ?????????????????????
+    "Turkey": EUROPEAN_REGION,  # ?????????????????????
     "Holy See": EUROPEAN_REGION,
+    "Jersey": EUROPEAN_REGION,
+    "Guernsey": EUROPEAN_REGION,
+    "Kosovo": EUROPEAN_REGION,
     #####################################################################
     "Thailand": SOUTH_EAST_ASIA_REGION,
     "Indonesia": SOUTH_EAST_ASIA_REGION,
@@ -91,7 +94,9 @@ region_map = {
     "Maldives": SOUTH_EAST_ASIA_REGION,
     "Bangladesh": SOUTH_EAST_ASIA_REGION,
     "Brunei": SOUTH_EAST_ASIA_REGION,
-    "Mongolia": SOUTH_EAST_ASIA_REGION, # ??????????
+    "Mongolia": SOUTH_EAST_ASIA_REGION,  # ??????????
+    "Uzbekistan": SOUTH_EAST_ASIA_REGION, # ?????????
+    "Kazakhstan": SOUTH_EAST_ASIA_REGION,  # ????????????
     #####################################################################
     "Armenia": EASTERN_MEDITERRANEAN_REGION,  # ????????????
     "Iran": IRAN_COUNTRY,
@@ -109,6 +114,7 @@ region_map = {
     "Jordan": EASTERN_MEDITERRANEAN_REGION,  # ??????????????
     "Israel": EASTERN_MEDITERRANEAN_REGION,
     "Palestine": EASTERN_MEDITERRANEAN_REGION,
+    "occupied Palestinian territory": EASTERN_MEDITERRANEAN_REGION,
     #####################################################################
     "US": REGION_OF_THE_AMERICANS,
     "Canada": REGION_OF_THE_AMERICANS,
@@ -131,6 +137,18 @@ region_map = {
     "Guyana": REGION_OF_THE_AMERICANS,
     "Panama": REGION_OF_THE_AMERICANS,
     "Bolivia": REGION_OF_THE_AMERICANS,
+    "Venezuela": REGION_OF_THE_AMERICANS,
+    "Curacao": REGION_OF_THE_AMERICANS,  # ?????
+    "Guatemala": REGION_OF_THE_AMERICANS,
+    "Saint Lucia": REGION_OF_THE_AMERICANS,
+    "Saint Vincent and the Grenadines": REGION_OF_THE_AMERICANS,
+    "Aruba": REGION_OF_THE_AMERICANS,
+    "Antigua and Barbuda": REGION_OF_THE_AMERICANS,
+    "Uruguay": REGION_OF_THE_AMERICANS,
+    "Trinidad and Tobago": REGION_OF_THE_AMERICANS,
+    "Cayman Islands": REGION_OF_THE_AMERICANS,
+    "Guadeloupe": REGION_OF_THE_AMERICANS,
+    "Suriname": REGION_OF_THE_AMERICANS,
     #####################################################################
     "Algeria": AFRICAN_REGION,
     "Nigeria": AFRICAN_REGION,
@@ -145,6 +163,20 @@ region_map = {
     "Cote d'Ivoire": AFRICAN_REGION,
     "Burkina Faso": AFRICAN_REGION,
     "Reunion": AFRICAN_REGION,
+    "Ghana": AFRICAN_REGION,
+    "Namibia": AFRICAN_REGION,
+    "Seychelles": AFRICAN_REGION,
+    "Eswatini": AFRICAN_REGION,
+    "Gabon": AFRICAN_REGION,
+    "Mauritania": AFRICAN_REGION,
+    "Rwanda": AFRICAN_REGION,
+    "Sudan": AFRICAN_REGION,
+    "Kenya": AFRICAN_REGION,
+    "Guinea": AFRICAN_REGION,
+    "Congo (Brazzaville)": AFRICAN_REGION,
+    "Equatorial Guinea": AFRICAN_REGION,
+    "Central African Republic": AFRICAN_REGION,
+    "Ethiopia": AFRICAN_REGION,
     #####################################################################
     "Others": OTHER,
     "Cruise Ship": OTHER,
