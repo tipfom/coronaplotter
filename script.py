@@ -107,10 +107,9 @@ plt.rc("axes", labelsize=20)
 
 # x-axis range
 xmin = 0
-xmax = 56
+xmax = 61
 # steps between major ticks on x-axi
 xstep = 7
-
 
 def get_yaxis_lim_ticks_labels(max_value):
     max_value = max_value * 1.05
@@ -225,9 +224,9 @@ def create_animation_frames(region):
         ax_regional_development.xaxis.set_minor_locator(MultipleLocator(1))
 
         # setting the y-axis ticks
-        ax_shared.set_yticks([0, 2e4, 4e4, 6e4, 8e4, 10e4, 12e4])
-        ax_shared.set_yticklabels(["0", "20k", "40k", "60k", "80k", "100k", "120k"])
-        ax_shared.yaxis.set_minor_locator(MultipleLocator(10000))
+        ax_shared.set_yticks([0, 4e4, 8e4, 12e4, 16e4])
+        ax_shared.set_yticklabels(["0", "40k", "80k", "120k", "160k"])
+        ax_shared.yaxis.set_minor_locator(MultipleLocator(20000))
 
         regional_lim_ticks_labels = get_yaxis_lim_ticks_labels(
             confirmed_by_region[region][current_date_index - 1]
@@ -240,7 +239,7 @@ def create_animation_frames(region):
         )
 
         # setting the y-axis limit
-        ax_shared.set_ylim([0, 100000])
+        ax_shared.set_ylim([0, 200000])
 
         # label axis
         plt.xlabel("date")
