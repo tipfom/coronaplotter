@@ -50,6 +50,7 @@ for confirmed_cases in confirmed_by_region:
 def get_row_fit_function(b):
     def row_fit_function(x, a, c):
         return a / (1 + np.exp(-b * (x - c)))
+
     return row_fit_function
 
 
@@ -61,7 +62,16 @@ def get_row_fit_jacobian(b):
                 -a / ((1 + np.exp(-b * (x - c))) ** 2) * b * np.exp(-b * (x - c)),
             ]
         )
+
     return row_fit_jacobian
+
+
+def _row_fit_function(x, a, b):
+    return a * np.exp(b * x)
+
+
+def _row_fit_jacobian(x, a, b):
+    return np.transpose([np.exp(b * x), a * x * np.exp(b * x)])
 
 
 def china_fit_function(x, a, b, c):
@@ -111,8 +121,27 @@ xmax = 61
 # steps between major ticks on x-axi
 xstep = 7
 
+
 def get_yaxis_lim_ticks_labels(max_value):
     max_value = max_value * 1.05
+    if max_value > 150000:
+        return (
+            [0, 200000],
+            [0, 4e5, 8e4, 12e5, 16e5, 20e5],
+            ["0", "40k", "80k", "120k", "160k", "200k"],
+        )
+    if max_value > 100000:
+        return (
+            [0, 150000],
+            [0, 3e5, 6e5, 9e5, 12e5, 15e5],
+            ["0", "30k", "60k", "90", "120k", "150k"],
+        )
+    if max_value > 80000:
+        return (
+            [0, 100000],
+            [0, 2.5e4, 5e4, 7.5e4, 10e4],
+            ["0", "25k", "50k", "75k", "100k"],
+        )
     if max_value > 50000:
         return ([0, 80000], [0, 2e4, 4e4, 6e4, 8e4], ["0", "20k", "40k", "60k", "80k"])
     if max_value > 20000:
@@ -224,9 +253,20 @@ def create_animation_frames(region):
         ax_regional_development.xaxis.set_minor_locator(MultipleLocator(1))
 
         # setting the y-axis ticks
-        ax_shared.set_yticks([0, 4e4, 8e4, 12e4, 16e4])
-        ax_shared.set_yticklabels(["0", "40k", "80k", "120k", "160k"])
-        ax_shared.yaxis.set_minor_locator(MultipleLocator(20000))
+        shared_lim_ticks_labels = get_yaxis_lim_ticks_labels(
+            np.max(
+                [
+                    confirmed_by_region[MAINLAND_CHINA][current_date_index - 1],
+                    row_data_y[current_date_index - 1],
+                ]
+            )
+        )
+        ax_shared.set_ylim(shared_lim_ticks_labels[0])
+        ax_shared.set_yticks(shared_lim_ticks_labels[1])
+        ax_shared.set_yticklabels(shared_lim_ticks_labels[2])
+        ax_shared.yaxis.set_minor_locator(
+            MultipleLocator(shared_lim_ticks_labels[1][1] / 2)
+        )
 
         regional_lim_ticks_labels = get_yaxis_lim_ticks_labels(
             confirmed_by_region[region][current_date_index - 1]
@@ -237,9 +277,6 @@ def create_animation_frames(region):
         ax_regional_development.yaxis.set_minor_locator(
             MultipleLocator(regional_lim_ticks_labels[1][1] / 2)
         )
-
-        # setting the y-axis limit
-        ax_shared.set_ylim([0, 200000])
 
         # label axis
         plt.xlabel("date")
@@ -331,13 +368,13 @@ def create_animation_frames(region):
                     confirmed_by_region[region][: current_date_index - k],
                     p0=[1000000, 20],
                     jac=jac,
-                    maxfev = 10000
+                    maxfev=10000,
                 )
             except Exception as e:
                 print(e)
                 print(i)
                 print(k)
-                print(i-k)
+                print(i - k)
 
             # get errors from trace of covariance matrix
             perr = np.sqrt(np.diag(pcov))
@@ -363,7 +400,9 @@ def create_animation_frames(region):
                 print("a = " + str(a))
                 print("b = " + str(b))
 
-                ax_regional_development.plot(nom_x, nom_y, color=row_regression_color, linewidth=3)
+                ax_regional_development.plot(
+                    nom_x, nom_y, color=row_regression_color, linewidth=3
+                )
                 ax_regional_development.fill_between(
                     nom_x,
                     nom_y - std_y,
@@ -386,6 +425,63 @@ def create_animation_frames(region):
                     nom_y + std_y,
                     facecolor=row_regression_color,
                     alpha=0.05,
+                )
+
+        for k in range(0, np.min([desired_fit_count, current_date_index - plot_start])):
+            # fit the sigmoidal function
+            popt, pcov = scipy.optimize.curve_fit(
+                _row_fit_function,
+                data_x[: current_date_index - k],
+                row_data_y[: current_date_index - k],
+                jac=_row_fit_jacobian,
+                maxfev=10000,
+            )
+            # get errors from trace of covariance matrix
+            perr = np.sqrt(np.diag(pcov))
+
+            # create uncertainty floats for error bars, 2* means 2 sigma
+            a = ufloat(popt[0], perr[0])
+            b = ufloat(popt[1], perr[1])
+
+            # get the values of the uncertain fit
+            fit_x_unc = np.linspace(xmin, xmax, 300)
+            fit_y_unc = a * unp.exp(b * fit_x_unc)
+            nom_x = unp.nominal_values(fit_x_unc)
+            nom_y = unp.nominal_values(fit_y_unc)
+            std_y = unp.std_devs(fit_y_unc)
+
+            # plot
+            if k == 0:
+                print(
+                    "["
+                    + (startdate + timedelta(current_date_index)).strftime("%d. %b")
+                    + "] China fit(y=a/(1+exp(-b*(x-c))))-parameters:"
+                )
+                print("a = " + str(a))
+                print("b = " + str(b))
+                ax_shared.plot(nom_x, nom_y, color=row_regression_color, linewidth=3)
+                ax_shared.fill_between(
+                    nom_x,
+                    nom_y - std_y,
+                    nom_y + std_y,
+                    facecolor=row_regression_color,
+                    alpha=0.6,
+                )
+            elif k == 1:
+                ax_shared.fill_between(
+                    nom_x,
+                    nom_y - std_y,
+                    nom_y + std_y,
+                    facecolor=row_regression_color,
+                    alpha=0.2,
+                )
+            elif k == 2:
+                ax_shared.fill_between(
+                    nom_x,
+                    nom_y - std_y,
+                    nom_y + std_y,
+                    facecolor=row_regression_color,
+                    alpha=0.1,
                 )
 
         for k in range(0, np.min([desired_fit_count, current_date_index - plot_start])):
@@ -550,7 +646,7 @@ def create_animation_frames(region):
 if __name__ == "__main__":
     import concurrent.futures
 
-    executor = concurrent.futures.ProcessPoolExecutor(6)
+    executor = concurrent.futures.ProcessPoolExecutor(1)
     futures = [
         executor.submit(create_animation_frames, item)
         for item in range(1, REGION_COUNT)
