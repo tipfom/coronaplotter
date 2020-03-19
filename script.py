@@ -127,13 +127,13 @@ def get_yaxis_lim_ticks_labels(max_value):
     if max_value > 150000:
         return (
             [0, 200000],
-            [0, 4e5, 8e4, 12e5, 16e5, 20e5],
+            [0, 4e4, 8e4, 12e4, 16e4, 20e4],
             ["0", "40k", "80k", "120k", "160k", "200k"],
         )
     if max_value > 100000:
         return (
-            [0, 150000],
-            [0, 3e5, 6e5, 9e5, 12e5, 15e5],
+            [0, 15000],
+            [0, 3e4, 6e4, 9e4, 12e4, 15e4],
             ["0", "30k", "60k", "90", "120k", "150k"],
         )
     if max_value > 80000:
@@ -663,7 +663,7 @@ def create_animation_frames(region):
 if __name__ == "__main__":
     import concurrent.futures
 
-    executor = concurrent.futures.ProcessPoolExecutor(1)
+    executor = concurrent.futures.ProcessPoolExecutor(7)
     futures = [
         executor.submit(create_animation_frames, item)
         for item in range(1, REGION_COUNT)
