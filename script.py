@@ -401,13 +401,13 @@ def create_animation_frames(region):
                 print("b = " + str(b))
 
                 ax_regional_development.plot(
-                    nom_x, nom_y, color=row_regression_color, linewidth=3
+                    nom_x, nom_y, color=regional_regression_color, linewidth=3
                 )
                 ax_regional_development.fill_between(
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
-                    facecolor=row_regression_color,
+                    facecolor=regional_regression_color,
                     alpha=0.5,
                 )
             elif k == 1:
@@ -415,7 +415,7 @@ def create_animation_frames(region):
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
-                    facecolor=row_regression_color,
+                    facecolor=regional_regression_color,
                     alpha=0.2,
                 )
             elif k == 2:
@@ -423,7 +423,7 @@ def create_animation_frames(region):
                     nom_x,
                     nom_y - std_y,
                     nom_y + std_y,
-                    facecolor=row_regression_color,
+                    facecolor=regional_regression_color,
                     alpha=0.05,
                 )
 

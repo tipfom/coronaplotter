@@ -9,16 +9,6 @@ row_regression_color = "#E8743B"  # np.array([255, 152, 51]) / 255
 row_recovered_color = "#0e8c62"
 row_dead_color = "black"
 
-region_colors = [
-    china_color,  # MAINLAND_CHINA = 0
-    "#BF399E",  # WESTERN_PACIFIC_REGION = 1
-    "#E8743B",  # EUROPEAN_REGION = 2
-    "#19A979",  # SOUTH_EAST_ASIA_REGION = 3
-    "#ED4A7B",  # EASTERN_MEDITERRANEAN_REGION = 4
-    "#945ECF",  # REGION_OF_THE_AMERICANS = 5
-    "#13A4B4",  # AFRICAN_REGION = 6
-    "#6C8893",  # OTHER = 7
-]
-
 regional_total_color = "#BF399E"
 regional_change_color = "#13A4B4"
+regional_regression_color = "#BF399E"
