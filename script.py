@@ -652,6 +652,10 @@ def create_animation_frames(region):
         plt.tight_layout()
         plt.savefig(f"./images/{region}_{l}.png")
 
+        if l == entries + 3:
+            plt.savefig(f"./images/{region}_highres.png", dpi=500)
+
+
         time.sleep(0.1)
         plt.close()
 
